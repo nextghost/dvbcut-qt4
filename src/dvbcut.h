@@ -36,7 +36,42 @@ class dvbcut : public QMainWindow, private Ui::dvbcutbase {
 private:
 	Q_OBJECT
 
+public:
+  struct quick_picture_lookup_s
+  {
+    int startpicture;
+    pts_t startpts;
+    int stoppicture;
+    pts_t stoppts;
+    int outpicture;
+    pts_t outpts;
+
+    quick_picture_lookup_s(int _startpicture, pts_t _startpts, int _stoppicture, pts_t _stoppts, int _outpicture, pts_t _outpts) :
+      startpicture(_startpicture), startpts(_startpts), stoppicture(_stoppicture), stoppts(_stoppts), outpicture(_outpicture), outpts(_outpts)
+    {
+    }
+
+    struct cmp_picture
+    {
+      bool operator()(int lhs, const quick_picture_lookup_s &rhs) const
+      {
+        return lhs<rhs.startpicture;
+      }
+    };
+    struct cmp_outpicture
+    {
+      bool operator()(int lhs, const quick_picture_lookup_s &rhs) const
+      {
+        return lhs<rhs.outpicture;
+      }
+    };
+  };
+  typedef std::vector<quick_picture_lookup_s> quick_picture_lookup_t;
+
 protected:
+	quick_picture_lookup_t quick_picture_lookup;
+	std::list<pts_t> chapterlist;
+
 	QActionGroup *audioTrackGroup;
 	inbuffer buf;
 	mpgfile *mpg;

@@ -33,6 +33,15 @@
 
 bool dvbcut::cache_friendly = true;
 
+inline static QString
+timestr(pts_t pts) {
+  return QString().sprintf("%02d:%02d:%02d.%03d",
+    int(pts/(3600*90000)),
+    int(pts/(60*90000))%60,
+    int(pts/90000)%60,
+    int(pts/90)%1000);
+}
+
 // **************************************************************************
 // ***  busy cursor helpers
 
@@ -98,11 +107,142 @@ void dvbcut::setviewscalefactor(double factor) {
 }
 
 void dvbcut::update_time_display() {
-
+  const index::picture &idx=(*mpg)[curpic];
+  const pts_t pts=idx.getpts()-firstpts;
+  const char *AR[]={"forbidden","1:1","4:3","16:9","2.21:1","reserved"};
+  const char *FR[]={"forbidden","23.976","24","25","29.97","30","50","59.94","60","reserved"};  
+ 
+  int outpic=0;
+  pts_t outpts=0;
+  QChar mark = ' ';
+  
+  // find the entry in the quick_picture_lookup table that corresponds to curpic
+  quick_picture_lookup_t::iterator it=
+    std::upper_bound(quick_picture_lookup.begin(),quick_picture_lookup.end(),curpic,quick_picture_lookup_s::cmp_picture());
+   
+  if (it!=quick_picture_lookup.begin())
+   {
+     // curpic is not before the first entry of the table
+     --it;
+     if (curpic < it->stoppicture)
+     {
+       // curpic is between (START and STOP[ pics of the current entry
+       outpic=curpic-it->stoppicture+it->outpicture;
+       outpts=pts-it->stoppts+it->outpts;
+       mark = '*';
+     }
+     else
+     {
+       // curpic is after the STOP-1 pic of the current entry
+       outpic=it->outpicture;
+       outpts=it->outpts;
+     }
+   }
+       
+  QString curtime =
+    QString(QChar(IDX_PICTYPE[idx.getpicturetype()]))
+    + " " + timestr(pts);
+  QString outtime =
+    QString(mark) + " " + timestr(outpts);
+  pictimelabel->setText(curtime);
+  pictimelabel2->setText(outtime);
+  goinput->setText(QString::number(curpic));
+  goinput2->setText(QString::number(outpic));
+  
+  int res=idx.getresolution();	// are found video resolutions stored in index?
+  if (res) {	
+    // new index with resolution bits set and lookup table at the end			  
+    picinfolabel->setText(QString::number(mpg->getwidth(res)) + "x" 
+                        + QString::number(mpg->getheight(res)));
+  } else {
+    // in case of an old index file type (or if we don't want to change the index format/encoding?)
+    // ==> get info directly from each image (which could be somewhat slower?!?)
+    QImage p = imageprovider(*mpg, new dvbcutbusy(this), true).getimage(curpic,false);   
+    picinfolabel->setText(QString::number(p.width()) + "x" 
+                        + QString::number(p.height()));
+  }
+  picinfolabel2->setText(QString(FR[idx.getframerate()]) + "fps, "
+                      + QString(AR[idx.getaspectratio()]));
 }
 
 void dvbcut::update_quick_picture_lookup_table() {
-	// FIXME: implement
+  // that's the (only) place where the event list should be scanned for  
+  // the exported pictures ranges, i.e. for START/STOP/CHAPTER markers!
+  quick_picture_lookup.clear(); 
+  chapterlist.clear();
+  
+  chapterlist.push_back(0);
+    
+  int startpic, stoppic, outpics=0, lastchapter=-2;
+  pts_t startpts, stoppts, outpts=0;
+  bool realzero=false;
+  
+  if(!nogui) {
+    // overwrite CLI options
+    start_bof = settings().start_bof;
+    stop_eof = settings().stop_eof;
+  }
+  
+  if (start_bof) {
+    startpic=0;
+    startpts=(*mpg)[0].getpts()-firstpts; 
+  }
+  else {
+    startpic=-1;
+    startpts=0; 
+  }
+
+/* FIXME: rewrite
+  for (QListBoxItem *item=eventlist->firstItem();item;item=item->next())
+    if (item->rtti()==EventListItem::RTTI()) {
+    const EventListItem &eli=*static_cast<const EventListItem*>(item);
+    switch (eli.geteventtype()) {
+      case EventListItem::start:
+	if (startpic<0 || (start_bof && startpic==0 && !realzero)) {
+          startpic=eli.getpicture();
+          startpts=eli.getpts();
+          if (startpic==0)
+	    realzero=true;        
+          // did we have a chapter in the eventlist directly before?
+          if(lastchapter==startpic)
+            chapterlist.push_back(outpts);
+        }
+        break;
+      case EventListItem::stop:
+        if (startpic>=0) {
+          stoppic=eli.getpicture();
+          stoppts=eli.getpts();        
+          outpics+=stoppic-startpic;
+          outpts+=stoppts-startpts;
+          
+          quick_picture_lookup.push_back(quick_picture_lookup_s(startpic,startpts,stoppic,stoppts,outpics,outpts));
+
+          startpic=-1;
+        }
+        break;
+      case EventListItem::chapter:
+        lastchapter=eli.getpicture();
+	if (startpic>=0)
+	  chapterlist.push_back(eli.getpts()-startpts+outpts);
+	break;
+      default:
+        break;
+      }
+    }
+*/
+
+  // last item in list was a (real or virtual) START
+  if (stop_eof && startpic>=0) {
+    // create a new export range by adding a virtual STOP marker at EOF 
+    stoppic=pictures-1;
+    stoppts=(*mpg)[stoppic].getpts()-firstpts;
+    outpics+=stoppic-startpic;
+    outpts+=stoppts-startpts;
+    
+    quick_picture_lookup.push_back(quick_picture_lookup_s(startpic,startpts,stoppic,stoppts,outpics,outpts)); 
+  }
+  
+  update_time_display();
 }
 
 int dvbcut::question(const QString & caption, const QString & text) {

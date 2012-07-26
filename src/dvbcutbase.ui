@@ -128,6 +128,13 @@
           </item>
           <item>
            <widget class="QLabel" name="picinfolabel">
+            <property name="font">
+             <font>
+              <family>Monospace</family>
+              <pointsize>10</pointsize>
+              <italic>false</italic>
+             </font>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -169,6 +176,12 @@
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
            <widget class="QLabel" name="pictimelabel">
+            <property name="font">
+             <font>
+              <family>Monospace</family>
+              <pointsize>16</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -189,6 +202,12 @@
           </item>
           <item>
            <widget class="QLabel" name="picinfolabel2">
+            <property name="font">
+             <font>
+              <family>Monospace</family>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -209,6 +228,12 @@
           </item>
           <item>
            <widget class="QLabel" name="pictimelabel2">
+            <property name="font">
+             <font>
+              <family>Monospace</family>
+              <pointsize>16</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string/>
             </property>
