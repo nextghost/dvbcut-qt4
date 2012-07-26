@@ -2,7 +2,8 @@ DVBCUT README -- last edited 2012-07-26
 
 This is a full QT4 port of dvbcut. The plan is to reimplement the original
 interface using proper QT4 classes (not just QT3support) and then make
-additional improvements.
+additional improvements. You can find the original QT3 version at
+http://sourceforge.net/projects/dvbcut/
 
 See the file "COPYING" for license issues. See the file "INSTALL" file for
 installation instructions.
