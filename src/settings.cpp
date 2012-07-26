@@ -28,8 +28,6 @@
 #include "defines.h"
 #include "settings.h"
 
-#define DVBCUT_QSETTINGS_DOMAIN "dvbcut.sf.net"
-#define DVBCUT_QSETTINGS_PRODUCT "dvbcut"
 #define DVBCUT_QSETTINGS_PATH "/" DVBCUT_QSETTINGS_DOMAIN "/" DVBCUT_QSETTINGS_PRODUCT "/"
 
 #define DVBCUT_DEFAULT_LOADFILTER \
@@ -79,9 +77,8 @@ pipe/3/label=recoded DVD compliant video (ffmpeg)
 pipe/3/post=
 */
 
-dvbcut_settings::dvbcut_settings() {
-  setPath(DVBCUT_QSETTINGS_DOMAIN, DVBCUT_QSETTINGS_PRODUCT);
-  beginGroup("/" DVBCUT_QSETTINGS_DOMAIN "/" DVBCUT_QSETTINGS_PRODUCT);
+dvbcut_settings::dvbcut_settings() : QSettings(DVBCUT_QSETTINGS_DOMAIN, DVBCUT_QSETTINGS_PRODUCT) {
+  beginGroup(DVBCUT_QSETTINGS_PRODUCT);
   loaded = false;
 }
 
@@ -90,6 +87,30 @@ dvbcut_settings::~dvbcut_settings() {
     save_settings();
   }
   endGroup();
+}
+
+int dvbcut_settings::readNumEntry(const QString &key, int def) {
+	bool valid;
+	int ret = value(key, def).toInt(&valid);
+
+	return valid ? ret : def;
+}
+
+bool dvbcut_settings::readBoolEntry(const QString &key, bool def) {
+	QVariant ret = value(key, def);
+
+	return ret.canConvert<bool>() ? ret.toBool() : def;
+}
+
+double dvbcut_settings::readDoubleEntry(const QString &key, double def) {
+	bool valid;
+	double ret = value(key, def).toDouble(&valid);
+
+	return valid ? ret : def;
+}
+
+QString dvbcut_settings::readEntry(const QString &key, const QString &def) {
+	return value(key, def).toString();
 }
 
 void
@@ -159,21 +180,21 @@ dvbcut_settings::load_settings() {
     prjfilter = readEntry("/prjfilter", DVBCUT_DEFAULT_PRJFILTER);
     loadfilter = readEntry("/loadfilter", DVBCUT_DEFAULT_LOADFILTER);
     // remove old-style entries
-    removeEntry("/wheel_incr_normal");
-    removeEntry("/wheel_incr_shift");
-    removeEntry("/wheel_incr_ctrl");
-    removeEntry("/wheel_incr_alt");
-    removeEntry("/wheel_threshold");
-    removeEntry("/wheel_delta");
-    removeEntry("/jog_maximum");
-    removeEntry("/jog_threshold");
-    removeEntry("/jog_offset");
-    removeEntry("/jog_interval");
-    removeEntry("/lin_interval");
-    removeEntry("/lastdir");
-    removeEntry("/idxfilter");
-    removeEntry("/prjfilter");
-    removeEntry("/loadfilter");
+    remove("/wheel_incr_normal");
+    remove("/wheel_incr_shift");
+    remove("/wheel_incr_ctrl");
+    remove("/wheel_incr_alt");
+    remove("/wheel_threshold");
+    remove("/wheel_delta");
+    remove("/jog_maximum");
+    remove("/jog_threshold");
+    remove("/jog_offset");
+    remove("/jog_interval");
+    remove("/lin_interval");
+    remove("/lastdir");
+    remove("/idxfilter");
+    remove("/prjfilter");
+    remove("/loadfilter");
   }
   if (version >= 2) {
     /* float view scale factor */
@@ -185,14 +206,14 @@ dvbcut_settings::load_settings() {
   else {
     viewscalefactor = (double)readNumEntry("/viewscalefactor", 1);
     viewscalefactor_custom = 3.0;
-    removeEntry("/viewscalefactor");
+    remove("/viewscalefactor");
   }
   export_format = readNumEntry("/export_format", 0);
   beginGroup("/recentfiles");
     recentfiles_max = readNumEntry("/max", 5);
     recentfiles.clear();
     std::list<std::string> filenames;
-    QStringList keys = entryList("/");
+    QStringList keys = childKeys();
     for (unsigned int i = 0; i < recentfiles_max; ++i) {
       QString key = "/" + QString::number(i);
       if (version < 1 && keys.size()>1) {
@@ -201,10 +222,10 @@ dvbcut_settings::load_settings() {
         if (filename.isEmpty())
 		  continue;
         filenames.clear();
-        filenames.push_back(filename);
+        filenames.push_back(filename.toStdString());
         QString idxfilename = readEntry(key + "-idx", "");
         recentfiles.push_back(
-        std::pair<std::list<std::string>,std::string>(filenames, idxfilename));
+        std::pair<std::list<std::string>,std::string>(filenames, idxfilename.toStdString()));
       }
       else {
 	// NEW format with subkeys and multiple files!
@@ -215,12 +236,12 @@ dvbcut_settings::load_settings() {
 		int j=0;
 		filenames.clear();
 		while(!filename.isEmpty()) {
-		  filenames.push_back(filename);
+		  filenames.push_back(filename.toStdString());
 		  filename = readEntry("/" + QString::number(++j), "");
 		}  
 		QString idxfilename = readEntry("/idx", "");
 		recentfiles.push_back(
-		  std::pair<std::list<std::string>,std::string>(filenames, idxfilename));
+		  std::pair<std::list<std::string>,std::string>(filenames, idxfilename.toStdString()));
 	  }
 	endGroup();	// key
       }
@@ -288,50 +309,52 @@ dvbcut_settings::load_settings() {
 
 void
 dvbcut_settings::save_settings() {
-  writeEntry("/version", 2);	// latest config version
+  setValue("/version", 2);	// latest config version
   beginGroup("/wheel");
-    writeEntry("/incr_normal", wheel_increments[WHEEL_INCR_NORMAL]);
-    writeEntry("/incr_shift", wheel_increments[WHEEL_INCR_SHIFT]);
-    writeEntry("/incr_ctrl", wheel_increments[WHEEL_INCR_CTRL]);
-    writeEntry("/incr_alt", wheel_increments[WHEEL_INCR_ALT]);
-    writeEntry("/threshold", wheel_threshold);
-    writeEntry("/delta", wheel_delta);
+    setValue("/incr_normal", wheel_increments[WHEEL_INCR_NORMAL]);
+    setValue("/incr_shift", wheel_increments[WHEEL_INCR_SHIFT]);
+    setValue("/incr_ctrl", wheel_increments[WHEEL_INCR_CTRL]);
+    setValue("/incr_alt", wheel_increments[WHEEL_INCR_ALT]);
+    setValue("/threshold", wheel_threshold);
+    setValue("/delta", wheel_delta);
   endGroup();	// wheel
   beginGroup("/slider");
-    writeEntry("/jog_maximum", jog_maximum);
-    writeEntry("/jog_threshold", jog_threshold);
-    writeEntry("/jog_offset", jog_offset);
-    writeEntry("/jog_interval", jog_interval);
-    writeEntry("/lin_interval", lin_interval);
+    setValue("/jog_maximum", jog_maximum);
+    setValue("/jog_threshold", jog_threshold);
+    setValue("/jog_offset", jog_offset);
+    setValue("/jog_interval", jog_interval);
+    setValue("/lin_interval", lin_interval);
   endGroup();	// slider
   beginGroup("/lastdir");
-    writeEntry("/name", lastdir);
-    writeEntry("/update", lastdir_update);
+    setValue("/name", lastdir);
+    setValue("/update", lastdir_update);
   endGroup();	// lastdir
   beginGroup("/filter");
-    writeEntry("/idxfilter", idxfilter);
-    writeEntry("/prjfilter", prjfilter);
-    writeEntry("/loadfilter", loadfilter);
+    setValue("/idxfilter", idxfilter);
+    setValue("/prjfilter", prjfilter);
+    setValue("/loadfilter", loadfilter);
   endGroup();	// filter
   beginGroup("/viewscalefactor");
-    writeEntry("/current", viewscalefactor);
-    writeEntry("/custom", viewscalefactor_custom);
+    setValue("/current", viewscalefactor);
+    setValue("/custom", viewscalefactor_custom);
   endGroup();	// viewscalefactor
-  writeEntry("/export_format", export_format);
+  setValue("/export_format", export_format);
   beginGroup("/recentfiles");
     // first remove any OLD recentfiles entries to clean the settings file (<revision 108)!!!
-    QStringList keys = entryList("/");
+    QStringList keys = childKeys();
     for ( QStringList::Iterator it = keys.begin(); it != keys.end(); ++it ) 
-      removeEntry("/" + *it);
+      remove("/" + *it);
     // then remove ALL new recentfiles entries!!!
     // (otherwise it would be a mess with erased&inserted muliple file entries of different size)
-    QStringList subkeys = subkeyList("/");
+    QStringList subkeys = childGroups();
     for ( QStringList::Iterator its = subkeys.begin(); its != subkeys.end(); ++its ) {
-      QStringList keys = entryList("/" + *its);
+      beginGroup("/" + *its);
+      QStringList keys = childKeys();
+      endGroup();
       for ( QStringList::Iterator itk = keys.begin(); itk != keys.end(); ++itk ) 
-        removeEntry("/"  + *its + "/" + *itk);
+        remove("/"  + *its + "/" + *itk);
     }    
-    writeEntry("/max", int(recentfiles_max));
+    setValue("/max", int(recentfiles_max));
     // and NOW write the updated list from scratch!!!
     for (unsigned int i = 0; i < recentfiles.size(); ++i) {
       QString key = "/" + QString::number(i);
@@ -339,46 +362,46 @@ dvbcut_settings::save_settings() {
         int j=0;
         for(std::list<std::string>::iterator it=settings().recentfiles[i].first.begin();
                                              it!=settings().recentfiles[i].first.end(); it++, j++) 
-          writeEntry("/" + QString::number(j), *it);
-        writeEntry("/idx", recentfiles[i].second);
+          setValue("/" + QString::number(j), it->c_str());
+        setValue("/idx", recentfiles[i].second.c_str());
       endGroup();	// key
     }
   endGroup();	// recentfiles
   beginGroup("/labels");
-    writeEntry("/start", start_label);
-    writeEntry("/stop", stop_label);
-    writeEntry("/chapter", chapter_label);
-    writeEntry("/bookmark", bookmark_label);
+    setValue("/start", start_label);
+    setValue("/stop", stop_label);
+    setValue("/chapter", chapter_label);
+    setValue("/bookmark", bookmark_label);
   endGroup();	// labels
-  writeEntry("/start_bof", start_bof);
-  writeEntry("/stop_eof", stop_eof);
+  setValue("/start_bof", start_bof);
+  setValue("/stop_eof", stop_eof);
   beginGroup("/snapshots");
-    writeEntry("/type", snapshot_type);
-    writeEntry("/quality", snapshot_quality);
-    writeEntry("/prefix", snapshot_prefix);
-    writeEntry("/delimiter", snapshot_delimiter);
-    writeEntry("/first", snapshot_first);
-    writeEntry("/width", snapshot_width);
-    writeEntry("/extension", snapshot_extension);
-    writeEntry("/range", snapshot_range);
-    writeEntry("/samples", snapshot_samples);
+    setValue("/type", snapshot_type);
+    setValue("/quality", snapshot_quality);
+    setValue("/prefix", snapshot_prefix);
+    setValue("/delimiter", snapshot_delimiter);
+    setValue("/first", snapshot_first);
+    setValue("/width", snapshot_width);
+    setValue("/extension", snapshot_extension);
+    setValue("/range", snapshot_range);
+    setValue("/samples", snapshot_samples);
   endGroup();	// snapshots
   beginGroup("/pipe");
     for (unsigned int i = 0; i < pipe_command.size(); ++i) {
       QString key = "/" + QString::number(i);
       beginGroup(key);
-	writeEntry("/command", pipe_command[i]);
-	writeEntry("/post", pipe_post[i]);
-	writeEntry("/label", pipe_label[i]);
-	writeEntry("/format", pipe_format[i]);
+	setValue("/command", pipe_command[i]);
+	setValue("/post", pipe_post[i]);
+	setValue("/label", pipe_label[i]);
+	setValue("/format", pipe_format[i]);
       endGroup();	// key
     }
   endGroup();	// pipe
   beginGroup("/chapters");
-    writeEntry("/interval", chapter_interval);
-    writeEntry("/tolerance", chapter_tolerance);
-    writeEntry("/threshold", chapter_threshold);
-    writeEntry("/minimum", chapter_minimum);
+    setValue("/interval", chapter_interval);
+    setValue("/tolerance", chapter_tolerance);
+    setValue("/threshold", chapter_threshold);
+    setValue("/minimum", chapter_minimum);
   endGroup();	// auto chapters
 }
 

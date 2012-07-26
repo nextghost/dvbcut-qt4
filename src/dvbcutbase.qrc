@@ -1,0 +1,8 @@
+<RCC>
+  <qresource prefix="dcb">
+    <file>../icons/bookmark.png</file>
+    <file>../icons/chapter.png</file>
+    <file>../icons/play.png</file>
+    <file>../icons/stop.png</file>
+  </qresource>
+</RCC>

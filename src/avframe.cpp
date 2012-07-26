@@ -18,7 +18,8 @@
 
 /* $Id$ */
 
-#include <qimage.h>
+//#include <qimage.h>
+#include <QImage>
 #include <cstdlib>
 #include <cstdio>
 #include "avframe.h"
@@ -111,14 +112,16 @@ QImage avframe::getqimage(bool scaled, double viewscalefactor)
   im.loadFromData(rgbbuffer, headerlen+w*h*3, "PPM");
 
 #ifdef HAVE_LIB_SWSCALE
-  im = im.swapRGB();
+//  im = im.swapRGB();
+  im = im.rgbSwapped();
 #endif
 
   if ((scaled && w!=dw)||(viewscalefactor!=1.0)) {
 #ifdef SMOOTHSCALE
     im = im.smoothScale(int((scaled?dw:w)/viewscalefactor+0.5), int(h/viewscalefactor+0.5));
 #else
-    im = im.scale(int((scaled?dw:w)/viewscalefactor+0.5), int(h/viewscalefactor+0.5));
+//    im = im.scale(int((scaled?dw:w)/viewscalefactor+0.5), int(h/viewscalefactor+0.5));
+    im = im.scaled(int((scaled?dw:w)/viewscalefactor+0.5), int(h/viewscalefactor+0.5));
 #endif
     }
 

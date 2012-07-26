@@ -41,6 +41,17 @@
 
 #include <stdio.h>
 
+#ifndef USE_FFMPEG_INTERNAL
+int avcodec_decode_video(AVCodecContext *avctx, AVFrame *picture, int *got_picture_ptr, uint8_t *buf, int buf_size) {
+	AVPacket avpkt;
+	av_init_packet(&avpkt);
+	avpkt.data = buf;
+	avpkt.size = buf_size;
+
+	return avcodec_decode_video2(avctx, picture, got_picture_ptr, &avpkt);
+}
+#endif
+
 const int mpgfile::frameratescr[16]=
   {
     1080000,1126125,1125000,1080000,900900,900000,540000,450450,450000,
@@ -248,7 +259,11 @@ void mpgfile::initcodeccontexts(int vid)
     stream *S=&s[VIDEOSTREAM];
     S->id=vid;
     S->allocavcc();
+#ifdef USE_FFMPEG_INTERNAL
     S->avcc->codec_type=CODEC_TYPE_VIDEO;
+#else
+    S->avcc->codec_type=AVMEDIA_TYPE_VIDEO;
+#endif
     S->avcc->codec_id=CODEC_ID_MPEG2VIDEO;
     S->dec=avcodec_find_decoder(CODEC_ID_MPEG2VIDEO);
     S->enc=avcodec_find_encoder(CODEC_ID_MPEG2VIDEO);

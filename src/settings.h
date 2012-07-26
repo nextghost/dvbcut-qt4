@@ -26,6 +26,9 @@
 
 #include <qsettings.h>
 
+#define DVBCUT_QSETTINGS_DOMAIN "dvbcut.sf.net"
+#define DVBCUT_QSETTINGS_PRODUCT "dvbcut"
+
 enum {
   WHEEL_INCR_NORMAL,
   WHEEL_INCR_SHIFT,
@@ -35,6 +38,13 @@ enum {
 };
 
 class dvbcut_settings : QSettings {
+protected:
+	// Wrapper fuctions for QSettings::value()
+	int readNumEntry(const QString &key, int def = 0);
+	bool readBoolEntry(const QString &key, bool def = false);
+	double readDoubleEntry(const QString &key, double def = 0);
+	QString readEntry(const QString &key, const QString &def = QString());
+
 public:
   dvbcut_settings();
   ~dvbcut_settings();

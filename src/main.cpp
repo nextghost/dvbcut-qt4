@@ -34,7 +34,7 @@
 
 #include <qapplication.h>
 extern "C" {
-#include <avformat.h>
+#include <libavformat/avformat.h>
 }
 #include <qimage.h>
 #include <qsettings.h>
@@ -42,12 +42,11 @@ extern "C" {
 #include "dvbcut.h"
 #include "mpgfile.h"
 #include "index.h"
+#include "settings.h"
 
 #include "gettext.h"
 
 #include "version.h"
-
-#define VERSION_STRING	"dvbcut " VERSION "/" REVISION
 
 static char *argv0;
 

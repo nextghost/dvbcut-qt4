@@ -22,9 +22,9 @@
 #define _DVBCUT_AVFRAME_H
 
 extern "C" {
-#include <avcodec.h>
+#include <libavcodec/avcodec.h>
 #ifdef HAVE_LIB_SWSCALE
-#include <swscale.h>
+#include <libswscale/swscale.h>
 #endif
 }
 

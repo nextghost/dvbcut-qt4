@@ -47,7 +47,8 @@ progressstatusbar::progressstatusbar(QStatusBar *bar)
   statusbar->addWidget(cancelbutton,true);
 
   progressbar=new QProgressBar(statusbar);
-  progressbar->setTotalSteps(1000);
+//  progressbar->setTotalSteps(1000);
+  progressbar->setMaximum(1000);
   progressbar->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum));
   progressbar->setMinimumWidth(160);
   progressbar->setMaximumWidth(160);
@@ -66,7 +67,8 @@ progressstatusbar::~progressstatusbar()
   delete progressbar;
   delete cancelbutton;
   delete label;
-  statusbar->clear();
+//  statusbar->clear();
+  statusbar->clearMessage();
   }
 
 
@@ -75,7 +77,8 @@ void progressstatusbar::setprogress(int permille)
   if (permille==currentprogress)
     return;
   currentprogress=permille;
-  progressbar->setProgress(permille);
+//  progressbar->setProgress(permille);
+  progressbar->setValue(permille);
   qApp->processEvents();
   }
 
