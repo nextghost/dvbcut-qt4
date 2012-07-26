@@ -52,9 +52,9 @@ public slots:
   virtual void editImport();
   virtual void editConvert(int);
   virtual void abouttoshoweditconvert();	// DONE: direct item placement in UI file
-  virtual void viewDifference();
-  virtual void viewUnscaled();
-  virtual void viewNormal();
+  virtual void viewDifference();	// DONE: on_viewDifferenceAction_triggered()
+  virtual void viewUnscaled();		// DONE: on_viewUnscaledAction_triggered()
+  virtual void viewNormal();		// DONE: on_viewNormalAction_triggered()
   virtual void zoomIn();
   virtual void zoomOut();
   virtual void viewFullSize();

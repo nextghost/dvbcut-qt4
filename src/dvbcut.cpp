@@ -22,6 +22,7 @@
 #include "settings.h"
 #include "busyindicator.h"
 #include "progressstatusbar.h"
+#include "differenceimageprovider.h"
 
 #include <QFileDialog>
 #include <QDir>
@@ -695,6 +696,34 @@ void dvbcut::editImport(void) {
 
 void dvbcut::editConvert(int) {
 	// FIXME: implement
+}
+
+void dvbcut::on_viewNormalAction_triggered(void) {
+	viewNormalAction->setChecked(true);
+
+	if (!imgp || imgp->rtti() != IMAGEPROVIDER_STANDARD) {
+		delete imgp;
+		imgp = new imageprovider(*mpg, new dvbcutbusy(this), false, viewscalefactor);
+		updateimagedisplay();
+	}
+}
+
+void dvbcut::on_viewUnscaledAction_triggered(void) {
+	viewUnscaledAction->setChecked(true);
+
+	if (!imgp || imgp->rtti() != IMAGEPROVIDER_UNSCALED) {
+		delete imgp;
+		imgp = new imageprovider(*mpg, new dvbcutbusy(this), true, viewscalefactor);
+		updateimagedisplay();
+	}
+}
+
+void dvbcut::on_viewDifferenceAction_triggered(void) {
+	viewDifferenceAction->setChecked(true);
+
+	delete imgp;
+	imgp = new differenceimageprovider(*mpg, curpic, new dvbcutbusy(this), false, viewscalefactor);
+	updateimagedisplay();
 }
 
 void dvbcut::on_jogslider_sliderReleased(void) {

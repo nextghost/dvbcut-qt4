@@ -96,6 +96,9 @@ public slots:
 	void editSuggest(void);
 	void editImport(void);
 	void editConvert(int);
+	void on_viewNormalAction_triggered();
+	void on_viewUnscaledAction_triggered();
+	void on_viewDifferenceAction_triggered();
 	void on_jogslider_sliderReleased();
 	void on_jogslider_valueChanged(int);
 	void on_linslider_valueChanged(int);
