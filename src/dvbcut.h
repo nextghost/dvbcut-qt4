@@ -134,6 +134,8 @@ public slots:
 	void on_viewNormalAction_triggered();
 	void on_viewUnscaledAction_triggered();
 	void on_viewDifferenceAction_triggered();
+	void viewScaleZoom(QAction *);
+	void setViewScaleMode(QAction *);
 	void on_jogslider_sliderReleased();
 	void on_jogslider_valueChanged(int);
 	void on_linslider_valueChanged(int);

@@ -2,7 +2,7 @@ class dvbcut: public dvbcutbase {
 protected:
   void exportvideo(const char *fmt);
   void addtorecentfiles(const std::list<std::string> &filenames, const std::string &idxfilename=std::string());	// DONE
-  void setviewscalefactor(double factor);
+  void setviewscalefactor(double factor);	// DONE
 
   bool eventFilter(QObject *watched, QEvent *e);
 
@@ -55,12 +55,12 @@ public slots:
   virtual void viewDifference();	// DONE: on_viewDifferenceAction_triggered()
   virtual void viewUnscaled();		// DONE: on_viewUnscaledAction_triggered()
   virtual void viewNormal();		// DONE: on_viewNormalAction_triggered()
-  virtual void zoomIn();
-  virtual void zoomOut();
-  virtual void viewFullSize();
-  virtual void viewHalfSize();
-  virtual void viewQuarterSize();
-  virtual void viewCustomSize();
+  virtual void zoomIn();		// DONE: viewScaleZoom()
+  virtual void zoomOut();		// DONE: viewScaleZoom()
+  virtual void viewFullSize();		// DONE: setViewScaleMode()
+  virtual void viewHalfSize();		// DONE: setViewScaleMode()
+  virtual void viewQuarterSize();	// DONE: setViewScaleMode()
+  virtual void viewCustomSize();	// DONE: setViewScaleMode()
   virtual void playAudio2();
   virtual void playAudio1();
   virtual void playStop();

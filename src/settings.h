@@ -61,7 +61,7 @@ public:
   QString loadfilter;
   std::vector<std::pair<std::list<std::string>,std::string> > recentfiles;
   unsigned int recentfiles_max;
-  double viewscalefactor;
+  int viewscalefactor;
   double viewscalefactor_custom;
   int wheel_increments[WHEEL_INCR_num];
   int wheel_threshold;

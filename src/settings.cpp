@@ -199,12 +199,12 @@ dvbcut_settings::load_settings() {
   if (version >= 2) {
     /* float view scale factor */
     beginGroup("/viewscalefactor");
-      viewscalefactor = readDoubleEntry("/current", 1.0);
+      viewscalefactor = readNumEntry("/current", 1);
       viewscalefactor_custom = readDoubleEntry("/custom", 3.0);
     endGroup(); // viewscalefactor
   } 
   else {
-    viewscalefactor = (double)readNumEntry("/viewscalefactor", 1);
+    viewscalefactor = readNumEntry("/viewscalefactor", 1);
     viewscalefactor_custom = 3.0;
     remove("/viewscalefactor");
   }

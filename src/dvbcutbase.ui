@@ -362,8 +362,8 @@
     <addaction name="viewUnscaledAction"/>
     <addaction name="viewDifferenceAction"/>
     <addaction name="separator"/>
-    <addaction name="actionZoom_in"/>
-    <addaction name="actionZoom_out"/>
+    <addaction name="zoomInAction"/>
+    <addaction name="zoomOutAction"/>
     <addaction name="separator"/>
     <addaction name="viewFullSizeAction"/>
     <addaction name="viewHalfSizeAction"/>
@@ -630,12 +630,12 @@
     <string>Show difference to current picture</string>
    </property>
   </action>
-  <action name="actionZoom_in">
+  <action name="zoomInAction">
    <property name="text">
     <string>Zoom in</string>
    </property>
   </action>
-  <action name="actionZoom_out">
+  <action name="zoomOutAction">
    <property name="text">
     <string>Zoom out</string>
    </property>

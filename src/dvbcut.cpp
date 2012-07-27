@@ -103,7 +103,16 @@ void dvbcut::addtorecentfiles(const std::list<std::string> &filenames, const std
 }
 
 void dvbcut::setviewscalefactor(double factor) {
-	// FIXME: implement
+	if (factor <= 0.0) {
+		factor = 1.0;
+	}
+
+	viewscalefactor = factor;
+
+	if (imgp) {
+		imgp->setviewscalefactor(factor);
+		updateimagedisplay();
+	}
 }
 
 void dvbcut::update_time_display() {
@@ -287,6 +296,9 @@ dvbcut::dvbcut(QWidget *parent) : QMainWindow(parent, Qt::Window),
 	imgp(NULL), busy(0), viewscalefactor(1.0), nogui(false) {
 
 	QActionGroup *group;
+	QAction *tmpAction;
+	QList<QAction *>::iterator it;
+	QList<QAction *> list;
 
 	setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose);
@@ -297,12 +309,39 @@ dvbcut::dvbcut(QWidget *parent) : QMainWindow(parent, Qt::Window),
 	group->addAction(viewUnscaledAction);
 	group->addAction(viewDifferenceAction);
 
-	// View size action group
+	// View scale action group
 	group = new QActionGroup(this);
+	viewFullSizeAction->setData(1);
+	viewHalfSizeAction->setData(2);
+	viewQuarterSizeAction->setData(4);
+	viewCustomSizeAction->setData(0);
 	group->addAction(viewFullSizeAction);
 	group->addAction(viewHalfSizeAction);
 	group->addAction(viewQuarterSizeAction);
 	group->addAction(viewCustomSizeAction);
+	connect(group, SIGNAL(triggered(QAction*)), this, SLOT(setViewScaleMode(QAction*)));
+
+	// Restore view scale settings
+	tmpAction = viewCustomSizeAction;
+	list = group->actions();
+
+	for (it = list.begin(); it != list.end(); ++it) {
+		if ((*it)->data().toInt() == settings().viewscalefactor) {
+			tmpAction = *it;
+			break;
+		}
+	}
+
+	tmpAction->trigger();
+
+	// Zoom action group
+	group = new QActionGroup(this);
+	zoomInAction->setData(1/1.2);
+	zoomOutAction->setData(1.2);
+	group->addAction(zoomInAction);
+	group->addAction(zoomOutAction);
+	connect(group, SIGNAL(triggered(QAction*)), this, SLOT(viewScaleZoom(QAction*)));
+
 
 #ifndef HAVE_LIB_AO
 	playAudio1Action->setEnabled(false);
@@ -312,8 +351,6 @@ dvbcut::dvbcut(QWidget *parent) : QMainWindow(parent, Qt::Window),
 	playMenu->removeAction(playAudio1Action);
 	playMenu->removeAction(playAudio2Action);
 #endif // ! HAVE_LIB_AO
-
-	setviewscalefactor(settings().viewscalefactor);
 
 	// install event handler
 	linslider->installEventFilter(this);
@@ -864,6 +901,18 @@ void dvbcut::on_viewDifferenceAction_triggered(void) {
 	delete imgp;
 	imgp = new differenceimageprovider(*mpg, curpic, new dvbcutbusy(this), false, viewscalefactor);
 	updateimagedisplay();
+}
+
+void dvbcut::viewScaleZoom(QAction *action) {
+	settings().viewscalefactor_custom = viewscalefactor * action->data().toDouble();
+	viewCustomSizeAction->trigger();
+}
+
+void dvbcut::setViewScaleMode(QAction *action) {
+	int scale = action->data().toInt();
+
+	settings().viewscalefactor = scale;
+	setviewscalefactor(scale > 0 ? scale : settings().viewscalefactor_custom);
 }
 
 void dvbcut::on_jogslider_sliderReleased(void) {
