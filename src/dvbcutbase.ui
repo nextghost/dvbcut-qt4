@@ -101,6 +101,9 @@
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
            <widget class="QLineEdit" name="goinput">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -111,6 +114,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="gobutton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>go</string>
             </property>
@@ -157,19 +163,25 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="gobutton2">
-            <property name="text">
-             <string>go</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QLineEdit" name="goinput2">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="gobutton2">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>go</string>
             </property>
            </widget>
           </item>
