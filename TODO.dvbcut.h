@@ -29,10 +29,10 @@ public:
   dvbcut(QWidget *parent = 0, const char *name = 0, WFlags fl = WType_TopLevel|WDestructiveClose );	// In progress
   void open(std::list<std::string> filenames=std::list<std::string>(), std::string idxfilename=std::string(), std::string expfilename=std::string());	// In progress
   void setbusy(bool b=true);	// DONE
-  void batchmode(bool b=true);
-  void exportoptions(int format=0, bool bof=true, bool eof=true);
+  void batchmode(bool b=true);	// DONE
+  void exportoptions(int format=0, bool bof=true, bool eof=true);	// DONE
   void addStartStopItems(std::vector<int>, int option=0);
-  int getTimePerFrame();
+  int getTimePerFrame();	// DONE
 
 public slots:
   virtual void fileNew();	// DONE: on_fileNewAction_triggered()
@@ -72,8 +72,8 @@ public slots:
   virtual void eventlistcontextmenu(QListBoxItem *, const QPoint &);
   virtual void mplayer_exited();
   virtual void mplayer_readstdout();
-  virtual void clickedgo();
-  virtual void clickedgo2();
+  virtual void clickedgo();			// DONE: on_gobutton_clicked()
+  virtual void clickedgo2();			// DONE: on_gobutton2_clicked()
   virtual void updateimagedisplay();		// DONE
   virtual void audiotrackchosen(int id);	// DONE: on_audiotrackpopup_triggered()
   virtual void loadrecentfile(int id);		// DONE: on_recentfilespopup_triggered()

@@ -49,6 +49,7 @@ std::string ptsstring(pts_t pts)
   return s;
   }
 
+// FIXME: fix to support locale settings
 // parse timestamp string (hh:mm:ss.frac/nn) and convert to pts (1/90000 of a second)
 pts_t string2pts(std::string str)
   {

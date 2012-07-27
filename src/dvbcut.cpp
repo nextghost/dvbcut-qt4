@@ -30,6 +30,7 @@
 #include <QTextStream>
 #include <QMessageBox>
 #include <QPixmap>
+#include <QRegExpValidator>
 
 bool dvbcut::cache_friendly = true;
 
@@ -299,9 +300,14 @@ dvbcut::dvbcut(QWidget *parent) : QMainWindow(parent, Qt::Window),
 	QAction *tmpAction;
 	QList<QAction *>::iterator it;
 	QList<QAction *> list;
+	// FIXME: use system decimal point separator in regexp
+	QRegExpValidator *validator = new QRegExpValidator(QRegExp("^\\d+|((\\d+:)?[0-5]?\\d:)?[0-5]?\\d(\\.\\d{1,3}(/\\d{1,2})?)?$"), this);
 
 	setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose);
+
+	goinput->setValidator(validator);
+	goinput2->setValidator(validator);
 
 	// View mode action group
 	group = new QActionGroup(this);
@@ -989,6 +995,44 @@ void dvbcut::on_linslider_valueChanged(int newpic) {
 	
 	update_time_display();
 	updateimagedisplay();
+}
+
+void dvbcut::on_gobutton_clicked(void) {
+	QString text = goinput->text();
+	int inpic;
+
+	// FIXME: check for system decimal point separator instead
+	if (text.contains(':') || text.contains('.')) {
+		inpic = string2pts(text.toStdString()) / getTimePerFrame();
+	} else {
+		inpic = text.toInt();
+	}
+
+	fine = true;
+	linslider->setValue(inpic);
+	fine = false;
+}
+
+void dvbcut::on_gobutton2_clicked(void) {
+	QString text = goinput2->text();
+	int inpic;
+
+	// FIXME: check for system decimal point separator instead
+	if (text.contains(':') || text.contains('.')) {
+		inpic = string2pts(text.toStdString()) / getTimePerFrame();
+	} else {
+		inpic = text.toInt();
+	}
+
+	if (!quick_picture_lookup.empty()) {
+		// find the entry in the quick_picture_lookup table that corresponds to given output picture
+		quick_picture_lookup_t::iterator it = std::upper_bound(quick_picture_lookup.begin(), quick_picture_lookup.end(), inpic, quick_picture_lookup_s::cmp_outpicture());
+		inpic = inpic - it->outpicture + it->stoppicture;
+	}
+
+	fine = true;
+	linslider->setValue(inpic);
+	fine = false;
 }
 
 void dvbcut::updateimagedisplay() {

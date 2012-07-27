@@ -57,6 +57,9 @@
         </sizepolicy>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="margin">
+         <number>0</number>
+        </property>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
@@ -796,6 +799,38 @@
     <hint type="destinationlabel">
      <x>361</x>
      <y>201</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>goinput</sender>
+   <signal>returnPressed()</signal>
+   <receiver>gobutton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>350</x>
+     <y>245</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>425</x>
+     <y>247</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>goinput2</sender>
+   <signal>returnPressed()</signal>
+   <receiver>gobutton2</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>716</x>
+     <y>246</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>658</x>
+     <y>246</y>
     </hint>
    </hints>
   </connection>

@@ -139,6 +139,8 @@ public slots:
 	void on_jogslider_sliderReleased();
 	void on_jogslider_valueChanged(int);
 	void on_linslider_valueChanged(int);
+	void on_gobutton_clicked();
+	void on_gobutton2_clicked();
 	void updateimagedisplay();
 	void on_audiotrackpopup_triggered(QAction *action);
 	void on_recentfilespopup_triggered(QAction *action);
