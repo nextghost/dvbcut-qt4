@@ -100,6 +100,9 @@ protected:
 	void addtorecentfiles(const std::list<std::string> &filenames, const std::string &idxfilename=std::string());
 	void setviewscalefactor(double factor);
 
+	// special event handling (mouse wheel)
+	bool eventFilter(QObject *watched, QEvent *e);
+
 	void update_time_display();
 	void update_quick_picture_lookup_table();
 

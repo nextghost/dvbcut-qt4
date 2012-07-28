@@ -31,6 +31,7 @@
 #include <QMessageBox>
 #include <QPixmap>
 #include <QRegExpValidator>
+#include <QWheelEvent>
 
 bool dvbcut::cache_friendly = true;
 
@@ -114,6 +115,62 @@ void dvbcut::setviewscalefactor(double factor) {
 		imgp->setviewscalefactor(factor);
 		updateimagedisplay();
 	}
+}
+
+bool dvbcut::eventFilter(QObject *watched, QEvent *e) {
+  bool myEvent = true;
+  int delta = 0;
+  int incr = WHEEL_INCR_NORMAL;
+
+  if (e->type() == QEvent::Wheel && watched != jogslider) {
+    QWheelEvent *we = (QWheelEvent*)e;
+    // Note: delta is a multiple of 120 (see Qt documentation)
+    delta = we->delta();
+      if (we->modifiers() & Qt::AltModifier)
+      incr = WHEEL_INCR_ALT;
+      else if (we->modifiers() & Qt::ControlModifier)
+      incr = WHEEL_INCR_CTRL;
+      else if (we->modifiers() & Qt::ShiftModifier)
+      incr = WHEEL_INCR_SHIFT;
+  }
+  else if (e->type() == QEvent::KeyPress) {
+    QKeyEvent *ke = (QKeyEvent*)e;
+    delta = ke->count() * settings().wheel_delta;
+    if (ke->key() == Qt::Key_Right)
+      delta = -delta;
+    else if (ke->key() != Qt::Key_Left)
+      myEvent = false;
+    if (ke->modifiers() & Qt::AltModifier)
+      incr = WHEEL_INCR_ALT;
+    else if (ke->modifiers() & Qt::ControlModifier)
+      incr = WHEEL_INCR_CTRL;
+    else if (ke->modifiers() & Qt::ShiftModifier)
+      incr = WHEEL_INCR_SHIFT;
+  }
+      else
+    myEvent = false;
+
+  if (myEvent) {
+    // process scroll event myself
+    incr = settings().wheel_increments[incr];
+      if (incr != 0) {
+        bool save = fine;
+	// use fine positioning if incr is small
+        fine = (incr < 0 ? -incr : incr) < settings().wheel_threshold;
+	// Note: delta is a multiple of 120 (see Qt documentation)
+        int newpos = curpic - (delta * incr) / settings().wheel_delta;
+        if (newpos < 0)
+	  newpos = 0;
+	else if (newpos >= pictures)
+	  newpos = pictures - 1;
+        linslider->setValue(newpos);
+        fine = save;
+      }
+      return true;
+    }
+
+  // propagate to base class
+  return QMainWindow::eventFilter(watched, e);
 }
 
 void dvbcut::update_time_display() {

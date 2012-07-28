@@ -4,7 +4,7 @@ protected:
   void addtorecentfiles(const std::list<std::string> &filenames, const std::string &idxfilename=std::string());	// DONE
   void setviewscalefactor(double factor);	// DONE
 
-  bool eventFilter(QObject *watched, QEvent *e);
+  bool eventFilter(QObject *watched, QEvent *e);	// DONE
 
   void update_time_display();			// DONE
   void update_quick_picture_lookup_table();	// In progress
