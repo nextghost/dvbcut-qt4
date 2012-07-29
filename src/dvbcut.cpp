@@ -35,15 +35,6 @@
 
 bool dvbcut::cache_friendly = true;
 
-inline static QString
-timestr(pts_t pts) {
-  return QString().sprintf("%02d:%02d:%02d.%03d",
-    int(pts/(3600*90000)),
-    int(pts/(60*90000))%60,
-    int(pts/90000)%60,
-    int(pts/90)%1000);
-}
-
 // **************************************************************************
 // ***  busy cursor helpers
 
@@ -347,6 +338,15 @@ void dvbcut::make_canonical(std::list<std::string> &filenames) {
 	}
 }
 
+void dvbcut::addEventListItem(int pic, EventListModel::EventType type) {
+	if (imgp && imgp->rtti() == IMAGEPROVIDER_STANDARD) {
+		eventdata.addItem(imgp, type, pic, (*mpg)[pic].getpicturetype(), (*mpg)[pic].getpts() - firstpts);
+	} else {
+		imageprovider stdimgp(*mpg, new dvbcutbusy(this), false, 4);
+		eventdata.addItem(&stdimgp, type, pic, (*mpg)[pic].getpicturetype(), (*mpg)[pic].getpts() - firstpts);
+	}
+}
+
 dvbcut::dvbcut(QWidget *parent) : QMainWindow(parent, Qt::Window),
 	audioTrackGroup(new QActionGroup(this)),
 	buf(8 << 20, 128 << 20), mpg(NULL), pictures(0), curpic(~0),
@@ -365,6 +365,18 @@ dvbcut::dvbcut(QWidget *parent) : QMainWindow(parent, Qt::Window),
 
 	goinput->setValidator(validator);
 	goinput2->setValidator(validator);
+
+	// Add marker action group
+	group = new QActionGroup(this);
+	editStartAction->setData(EventListModel::Start);
+	editStopAction->setData(EventListModel::Stop);
+	editChapterAction->setData(EventListModel::Chapter);
+	editBookmarkAction->setData(EventListModel::Bookmark);
+	group->addAction(editStartAction);
+	group->addAction(editStopAction);
+	group->addAction(editChapterAction);
+	group->addAction(editBookmarkAction);
+	connect(group, SIGNAL(triggered(QAction*)), this, SLOT(editAddMarker(QAction*)));
 
 	// View mode action group
 	group = new QActionGroup(this);
@@ -420,6 +432,10 @@ dvbcut::dvbcut(QWidget *parent) : QMainWindow(parent, Qt::Window),
 
 	// set caption
 	setWindowTitle(QString(VERSION_STRING));
+
+	eventlist->setModel(&eventdata);
+	eventlist->setItemDelegate(eventdata.delegate());
+	eventlist->setSelectionMode(QAbstractItemView::SingleSelection);
 }
 
 dvbcut::~dvbcut(void) {
@@ -926,6 +942,16 @@ void dvbcut::fileExport(void) {
 	// FIXME: implement
 }
 
+void dvbcut::editAddMarker(QAction *action) {
+	EventListModel::EventType type = (EventListModel::EventType)action->data().toInt();
+
+	addEventListItem(curpic, type);
+
+	if (type != EventListModel::Bookmark) {
+		update_quick_picture_lookup_table();
+	}
+}
+
 void dvbcut::editSuggest(void) {
 	// FIXME: implement
 }
@@ -1052,6 +1078,18 @@ void dvbcut::on_linslider_valueChanged(int newpic) {
 	
 	update_time_display();
 	updateimagedisplay();
+}
+
+void dvbcut::on_eventlist_activated(const QModelIndex &index) {
+	if (!index.isValid()) {
+		return;
+	}
+
+	EventListModel::EventListItem *item = (EventListModel::EventListItem *)index.internalPointer();
+
+	fine = true;
+	linslider->setValue(item->pic);
+	fine = false;
 }
 
 void dvbcut::on_gobutton_clicked(void) {

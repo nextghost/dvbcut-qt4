@@ -99,3 +99,11 @@ pts_t string2pts(std::string str)
   
   return sign*((((hour*60 + min)*60 + sec)*1000 + ms)*90 + sub);
   }
+
+QString timestr(pts_t pts) {
+  return QString().sprintf("%02d:%02d:%02d.%03d",
+    int(pts/(3600*90000)),
+    int(pts/(60*90000))%60,
+    int(pts/90000)%60,
+    int(pts/90)%1000);
+}

@@ -15,7 +15,7 @@ protected:
   void make_canonical(std::string &filename);			// DONE
   void make_canonical(std::list<std::string> &filenames);	// DONE
 
-  void addEventListItem(int pic, EventListItem::eventtype type);
+  void addEventListItem(int pic, EventListItem::eventtype type);	// DONE
 
   void snapshotSave(std::vector<int> piclist, int range=0, int samples=1);
   int chooseBestPicture(int startpic, int range, int smaples);
@@ -43,10 +43,10 @@ public slots:
   virtual void chapterSnapshotsSave();
   virtual void fileExport();
   virtual void fileClose();	// DONE: direct connection in UI file
-  virtual void editBookmark();
-  virtual void editChapter();
-  virtual void editStop();
-  virtual void editStart();
+  virtual void editBookmark();	// DONE: editAddMarker()
+  virtual void editChapter();	// DONE: editAddMarker()
+  virtual void editStop();	// DONE: editAddMarker()
+  virtual void editStart();	// DONE: editAddMarker()
   virtual void editAutoChapters();
   virtual void editSuggest();
   virtual void editImport();
@@ -68,7 +68,7 @@ public slots:
   virtual void jogsliderreleased();	// DONE: on_jogslider_sliderReleased()
   virtual void jogslidervalue(int);	// DONE: on_jogslider_valueChanged()
   virtual void linslidervalue(int);	// In progress: on_linslider_valueChanged()
-  virtual void doubleclickedeventlist(QListBoxItem *lbi);
+  virtual void doubleclickedeventlist(QListBoxItem *lbi);	// DONE: on_eventlist_activated()
   virtual void eventlistcontextmenu(QListBoxItem *, const QPoint &);
   virtual void mplayer_exited();
   virtual void mplayer_readstdout();

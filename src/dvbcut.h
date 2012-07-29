@@ -29,6 +29,7 @@
 #include "buffer.h"
 #include "mpgfile.h"
 #include "imageprovider.h"
+#include "eventlistmodel.h"
 
 #define VERSION_STRING	"dvbcut " VERSION "/" REVISION
 
@@ -71,6 +72,7 @@ public:
 protected:
 	quick_picture_lookup_t quick_picture_lookup;
 	std::list<pts_t> chapterlist;
+	EventListModel eventdata;
 
 	QActionGroup *audioTrackGroup;
 	inbuffer buf;
@@ -114,6 +116,9 @@ protected:
 	void make_canonical(std::string &filename);
 	void make_canonical(std::list<std::string> &filenames);
 
+	// generic event item adder
+	void addEventListItem(int pic, EventListModel::EventType type);
+
 public:
 	static bool cache_friendly;
 
@@ -131,6 +136,7 @@ public slots:
 	void on_fileNewAction_triggered(void);
 	void on_fileOpenAction_triggered(void);
 	void fileExport(void);
+	void editAddMarker(QAction *);
 	void editSuggest(void);
 	void editImport(void);
 	void editConvert(int);
@@ -142,6 +148,7 @@ public slots:
 	void on_jogslider_sliderReleased();
 	void on_jogslider_valueChanged(int);
 	void on_linslider_valueChanged(int);
+	void on_eventlist_activated(const QModelIndex&);
 	void on_gobutton_clicked();
 	void on_gobutton2_clicked();
 	void updateimagedisplay();
