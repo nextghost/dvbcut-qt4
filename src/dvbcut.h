@@ -135,6 +135,8 @@ public:
 public slots:
 	void on_fileNewAction_triggered(void);
 	void on_fileOpenAction_triggered(void);
+	void on_fileSaveAction_triggered(void);
+	void on_fileSaveAsAction_triggered(void);
 	void fileExport(void);
 	void editAddMarker(QAction *);
 	void editSuggest(void);

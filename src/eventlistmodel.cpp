@@ -184,3 +184,17 @@ QSize EventListDelegate::sizeHint(const QStyleOptionViewItem &option, const QMod
 	h = qMax(h + 6, QApplication::globalStrut().height());
 	return QSize(w + tmp.width() + 3, h).expandedTo(tmp);
 }
+
+EventListModel::const_iterator EventListModel::constBegin(void) const {
+	return _data.constBegin();
+}
+
+EventListModel::const_iterator EventListModel::constEnd(void) const {
+	return _data.constEnd();
+}
+
+void EventListModel::clear(void) {
+	beginRemoveRows(QModelIndex(), 0, _data.size() - 1);
+	_data.clear();
+	endRemoveRows();
+}

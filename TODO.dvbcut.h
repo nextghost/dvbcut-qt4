@@ -37,8 +37,8 @@ public:
 public slots:
   virtual void fileNew();	// DONE: on_fileNewAction_triggered()
   virtual void fileOpen();	// DONE: on_fileOpenAction_triggered()
-  virtual void fileSaveAs();
-  virtual void fileSave();
+  virtual void fileSaveAs();	// DONE: on_fileSaveAsAction_triggered()
+  virtual void fileSave();	// DONE: on_fileSaveAction_triggered()
   virtual void snapshotSave();
   virtual void chapterSnapshotsSave();
   virtual void fileExport();

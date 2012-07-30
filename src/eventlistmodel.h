@@ -52,6 +52,8 @@ public:
 		pts_t pts;
 	};
 
+	typedef QList<EventListItem>::const_iterator const_iterator;
+
 private:
 	QList<EventListItem> _data;
 	EventListDelegate _delegate;
@@ -67,4 +69,8 @@ public:
 
 	QAbstractItemDelegate *delegate(void);
 	void addItem(imageprovider *imgp, EventType type, int pic, int pictype, pts_t pts);
+
+	const_iterator constBegin() const;
+	const_iterator constEnd() const;
+	void clear(void);
 };

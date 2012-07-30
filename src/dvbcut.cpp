@@ -493,8 +493,9 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
     delete imgp;
     imgp=0;
   }
-// FIXME: rewrite
-//  eventlist->clear();
+
+  eventdata.clear();
+// FIXME: rewrite?
 //  imagedisplay->setBackgroundMode(Qt::PaletteBackground);
   imagedisplay->setMinimumSize(QSize(0,0));
   imagedisplay->setPixmap(QPixmap());
@@ -834,16 +835,15 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
     QDomElement e;
     for (QDomNode n=domdoc.documentElement().firstChild();!n.isNull();n=n.nextSibling())
       if (!(e=n.toElement()).isNull()) {
-/* FIXME: rewrite
-      EventListItem::eventtype evt;
+      EventListModel::EventType evt;
       if (e.tagName()=="start")
-        evt=EventListItem::start;
+        evt=EventListModel::Start;
       else if (e.tagName()=="stop")
-        evt=EventListItem::stop;
+        evt=EventListModel::Stop;
       else if (e.tagName()=="chapter")
-        evt=EventListItem::chapter;
+        evt=EventListModel::Chapter;
       else if (e.tagName()=="bookmark")
-        evt=EventListItem::bookmark;
+        evt=EventListModel::Bookmark;
       else
         continue;
       bool okay=false;
@@ -851,15 +851,14 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
       QString str=e.attribute("picture","-1");
       if (str.contains(':') || str.contains('.')) {
         okay=true;
-        picnum=string2pts(str)/getTimePerFrame();
+        picnum=string2pts(str.toStdString())/getTimePerFrame();
       }
       else
         picnum=str.toInt(&okay,0);
       if (okay && picnum>=0 && picnum<pictures) {
-        new EventListItem(eventlist,imgp->getimage(picnum),evt,picnum,(*mpg)[picnum].getpicturetype(),(*mpg)[picnum].getpts()-firstpts);
-        qApp->processEvents();
+		addEventListItem(picnum, evt);
+		qApp->processEvents();
       }
-*/
     }
   }
 
@@ -936,6 +935,103 @@ void dvbcut::on_fileNewAction_triggered(void) {
 
 void dvbcut::on_fileOpenAction_triggered(void) {
 	open();
+}
+
+void dvbcut::on_fileSaveAction_triggered(void) {
+  if (prjfilen.empty()) {
+    on_fileSaveAsAction_triggered();
+    return;
+  }
+
+  QFile outfile(QString::fromStdString(prjfilen));
+  if (!outfile.open(QIODevice::WriteOnly)) {
+    critical("Failed to write project file - dvbcut",
+      QString::fromStdString(prjfilen) + ":\nCould not open file");
+    return;
+  }
+
+  QDomDocument doc("dvbcut");
+  QDomElement root = doc.createElement("dvbcut");
+#if 0
+  root.setAttribute("mpgfile",mpgfilen.front());
+  if (!idxfilen.empty())
+    root.setAttribute("idxfile",idxfilen);
+#endif
+  doc.appendChild(root);
+
+  std::list<std::string>::const_iterator it = mpgfilen.begin();
+  while (it != mpgfilen.end()) {
+    QDomElement elem = doc.createElement("mpgfile");
+    elem.setAttribute("path", QString::fromStdString(*it));
+    root.appendChild(elem);
+    ++it;
+  }
+
+  if (!idxfilen.empty()) {
+    QDomElement elem = doc.createElement("idxfile");
+    elem.setAttribute("path", QString::fromStdString(idxfilen));
+    root.appendChild(elem);
+  }
+
+	EventListModel::const_iterator item;
+  for (item = eventdata.constBegin(); item != eventdata.constEnd(); ++item) {
+      QString elemname;
+      EventListModel::EventType evt = item->evtype;
+
+      if (evt==EventListModel::Start)
+	elemname="start";
+      else if (evt==EventListModel::Stop)
+	elemname="stop";
+      else if (evt==EventListModel::Chapter)
+	elemname="chapter";
+      else if (evt==EventListModel::Bookmark)
+	elemname="bookmark";
+      else
+	continue;
+
+      QDomElement elem=doc.createElement(elemname);
+      elem.setAttribute("picture", item->pic);
+      root.appendChild(elem);
+    }
+
+  QTextStream stream(&outfile);
+  stream.setCodec("UTF-8");
+  stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+  stream << doc.toString();
+  outfile.close();
+}
+
+void dvbcut::on_fileSaveAsAction_triggered(void) {
+  if (prjfilen.empty() && !mpgfilen.empty() && !mpgfilen.front().empty()) {
+    std::string prefix = mpgfilen.front();
+    int lastdot = prefix.rfind(".");
+    int lastslash = prefix.rfind("/");
+    if (lastdot >= 0 && lastdot > lastslash)
+      prefix = prefix.substr(0, lastdot);
+    prjfilen = prefix + ".dvbcut";
+    int nr = 0;
+    while (QFileInfo(QString::fromStdString(prjfilen)).exists())
+      prjfilen = prefix + "_" + (QString::number(++nr).toStdString()) + ".dvbcut";
+  }
+
+  QString s=QFileDialog::getSaveFileName(
+    this,
+    "Save project as...",
+    QString::fromStdString(prjfilen),
+    settings().prjfilter);
+
+  if (s.isNull())
+    return;
+
+  if (QFileInfo(s).exists() && question(
+      "File exists - dvbcut",
+      s + "\nalready exists. Overwrite?") !=
+      QMessageBox::Yes)
+    return;
+
+  prjfilen=s.toStdString();
+  if (!prjfilen.empty())
+    on_fileSaveAction_triggered();
 }
 
 void dvbcut::fileExport(void) {
