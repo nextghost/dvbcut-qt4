@@ -36,17 +36,8 @@
        <bool>false</bool>
       </property>
       <widget class="QListView" name="eventlist">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
+       <property name="verticalScrollMode">
+        <enum>QAbstractItemView::ScrollPerPixel</enum>
        </property>
       </widget>
       <widget class="QWidget" name="widget_2" native="true">
@@ -141,7 +132,6 @@
              <font>
               <family>Monospace</family>
               <pointsize>10</pointsize>
-              <italic>false</italic>
              </font>
             </property>
             <property name="text">

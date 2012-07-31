@@ -820,13 +820,11 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
   linslider->setValue(0);
   jogslider->setValue(0);
 
-/* FIXME: rewrite
-  {
-    EventListItem *eli=new EventListItem(0,imgp->getimage(0),EventListItem::start,9999999,2,0);
-    eventlist->setMinimumWidth(eli->width(eventlist)+24);
-    delete eli;
-  }
-*/
+	{
+		EventListModel tmpmodel;
+		tmpmodel.addItem(imgp, EventListModel::Start, 0, 2, 0);
+		eventlist->setMinimumWidth(tmpmodel.delegate()->sizeHint(QStyleOptionViewItem(), tmpmodel.index(0, 0, QModelIndex())).width() + 24);
+	}
 
   if (!domdoc.isNull()) {
     QDomElement e;
