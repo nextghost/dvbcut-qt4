@@ -7,7 +7,7 @@ protected:
   bool eventFilter(QObject *watched, QEvent *e);	// DONE
 
   void update_time_display();			// DONE
-  void update_quick_picture_lookup_table();	// In progress
+  void update_quick_picture_lookup_table();	// DONE
 
   int question(const QString & caption, const QString & text);	// DONE
   int critical(const QString & caption, const QString & text);	// DONE

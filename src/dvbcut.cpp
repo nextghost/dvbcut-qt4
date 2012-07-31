@@ -250,15 +250,13 @@ void dvbcut::update_quick_picture_lookup_table() {
     startpts=0; 
   }
 
-/* FIXME: rewrite
-  for (QListBoxItem *item=eventlist->firstItem();item;item=item->next())
-    if (item->rtti()==EventListItem::RTTI()) {
-    const EventListItem &eli=*static_cast<const EventListItem*>(item);
-    switch (eli.geteventtype()) {
-      case EventListItem::start:
+	EventListModel::const_iterator item;
+	for (item = eventdata.constBegin(); item != eventdata.constEnd(); ++item) {
+    switch (item->evtype) {
+      case EventListModel::Start:
 	if (startpic<0 || (start_bof && startpic==0 && !realzero)) {
-          startpic=eli.getpicture();
-          startpts=eli.getpts();
+          startpic = item->pic;
+          startpts = item->pts;
           if (startpic==0)
 	    realzero=true;        
           // did we have a chapter in the eventlist directly before?
@@ -266,10 +264,10 @@ void dvbcut::update_quick_picture_lookup_table() {
             chapterlist.push_back(outpts);
         }
         break;
-      case EventListItem::stop:
+      case EventListModel::Stop:
         if (startpic>=0) {
-          stoppic=eli.getpicture();
-          stoppts=eli.getpts();        
+          stoppic = item->pic;
+          stoppts = item->pts;
           outpics+=stoppic-startpic;
           outpts+=stoppts-startpts;
           
@@ -278,16 +276,15 @@ void dvbcut::update_quick_picture_lookup_table() {
           startpic=-1;
         }
         break;
-      case EventListItem::chapter:
-        lastchapter=eli.getpicture();
+      case EventListModel::Chapter:
+        lastchapter = item->pic;
 	if (startpic>=0)
-	  chapterlist.push_back(eli.getpts()-startpts+outpts);
+	  chapterlist.push_back(item->pts - startpts + outpts);
 	break;
       default:
         break;
       }
     }
-*/
 
   // last item in list was a (real or virtual) START
   if (stop_eof && startpic>=0) {
