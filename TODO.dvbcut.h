@@ -31,7 +31,7 @@ public:
   void setbusy(bool b=true);	// DONE
   void batchmode(bool b=true);	// DONE
   void exportoptions(int format=0, bool bof=true, bool eof=true);	// DONE
-  void addStartStopItems(std::vector<int>, int option=0);
+  void addStartStopItems(std::vector<int>, int option=0);		// DONE
   int getTimePerFrame();	// DONE
 
 public slots:
@@ -47,10 +47,10 @@ public slots:
   virtual void editChapter();	// DONE: editAddMarker()
   virtual void editStop();	// DONE: editAddMarker()
   virtual void editStart();	// DONE: editAddMarker()
-  virtual void editAutoChapters();
-  virtual void editSuggest();
-  virtual void editImport();
-  virtual void editConvert(int);
+  virtual void editAutoChapters();	// DONE: on_editAutoChaptersAction_triggered()
+  virtual void editSuggest();	// DONE: on_editSuggestAction_triggered()
+  virtual void editImport();	// DONE: on_editImportAction_triggered()
+  virtual void editConvert(int);	// DONE: editConvert() + on_editconvertpopup_triggered()
   virtual void abouttoshoweditconvert();	// DONE: direct item placement in UI file
   virtual void viewDifference();	// DONE: on_viewDifferenceAction_triggered()
   virtual void viewUnscaled();		// DONE: on_viewUnscaledAction_triggered()

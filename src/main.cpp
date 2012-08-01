@@ -218,19 +218,19 @@ main(int argc, char *argv[]) {
     main->open(filenames,idxfilename,expfilename);
     if(!cutlist.empty()) {
       if(cutlist.front()=="AR") {  // obsolete (use 4:3 resp. 16:9 instead)! Or just in case of another AR... 
-          main->editSuggest();
+          main->on_editSuggestAction_triggered();
           main->editConvert(0);             
       } else if(cutlist.front()=="4:3") {
-          main->editSuggest();     
+          main->on_editSuggestAction_triggered();     
           main->editConvert(2);             
       } else if(cutlist.front()=="16:9") {
-          main->editSuggest();     
+          main->on_editSuggestAction_triggered();     
           main->editConvert(3);             
       } else if(cutlist.front()=="TS" || cutlist.front()=="TS1") {  // first bookmark is a START
-          main->editImport();     
+          main->on_editImportAction_triggered();     
           main->editConvert(0);             
       } else if(cutlist.front()=="TS2") { // 2nd bookmark is a START
-          main->editImport();     
+          main->on_editImportAction_triggered();     
           main->editConvert(1);             
       } else { 
           std::vector<int> piclist, prob_item, prob_pos;

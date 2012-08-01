@@ -139,8 +139,10 @@ public slots:
 	void on_fileSaveAsAction_triggered(void);
 	void fileExport(void);
 	void editAddMarker(QAction *);
-	void editSuggest(void);
-	void editImport(void);
+	void on_editAutoChaptersAction_triggered();
+	void on_editSuggestAction_triggered(void);
+	void on_editImportAction_triggered(void);
+	void on_editconvertpopup_triggered(QAction *action);
 	void editConvert(int);
 	void on_viewNormalAction_triggered();
 	void on_viewUnscaledAction_triggered();

@@ -375,6 +375,12 @@ dvbcut::dvbcut(QWidget *parent) : QMainWindow(parent, Qt::Window),
 	group->addAction(editBookmarkAction);
 	connect(group, SIGNAL(triggered(QAction*)), this, SLOT(editAddMarker(QAction*)));
 
+	// Edit convert actions
+	editConvertStart->setData(0);
+	editConvertStop->setData(1);
+	editConvert4_3->setData(2);
+	editConvert16_9->setData(3);
+
 	// View mode action group
 	group = new QActionGroup(this);
 	group->addAction(viewNormalAction);
@@ -919,8 +925,43 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
   }
 }
 
-void dvbcut::addStartStopItems(std::vector<int>, int option) {
-	// FIXME: implement
+void dvbcut::addStartStopItems(std::vector<int> cutlist, int option) {
+  // take list of frame numbers and set alternating START/STOP markers
+  bool alternate=true;
+  EventListModel::EventType type=EventListModel::Start;
+  if(option==1)
+    type=EventListModel::Stop;
+  else if(option==2 || option==3)
+    alternate=false;   
+ 
+  // make sure list is sorted... 
+  sort(cutlist.begin(),cutlist.end());
+
+  // ...AND there are no old START/STOP pairs!!!
+	eventdata.remove(EventListModel::Start);
+	eventdata.remove(EventListModel::Stop);
+  
+  for (std::vector<int>::iterator it = cutlist.begin(); it != cutlist.end(); ++it) {   
+    if(!alternate) {
+      // set START/STOP according aspect ratio (2=4:3, 3=16:9)
+      if (option == (*mpg)[*it].getaspectratio()) 
+        type=EventListModel::Start;
+      else 
+        type=EventListModel::Stop;  
+    } 
+
+    addEventListItem(*it, type);
+
+    if(alternate) {
+      // set START/STOP alternatingly
+      if(type==EventListModel::Start) 
+        type=EventListModel::Stop;
+      else
+        type=EventListModel::Start;  
+    }
+  }
+  
+  update_quick_picture_lookup_table();
 }
 
 void dvbcut::on_fileNewAction_triggered(void) {
@@ -1043,16 +1084,130 @@ void dvbcut::editAddMarker(QAction *action) {
 	}
 }
 
-void dvbcut::editSuggest(void) {
-	// FIXME: implement
+void dvbcut::on_editAutoChaptersAction_triggered(void) {
+  int inpic, chapters = 0;
+  quick_picture_lookup_t::iterator it;
+  QImage p1, p2;
+
+  // the first chapter at 0sec is ALWAYS set by default from update_quick_picture_lookup_table()
+  int chapter_start; 
+  if(settings().chapter_interval>0) {
+    chapter_start = settings().chapter_interval;  // fixed length of intervals
+  } else {
+    chapter_start = quick_picture_lookup.back().outpicture/(1-settings().chapter_interval);  // given number of chapters
+    chapter_start = chapter_start > settings().chapter_minimum ? chapter_start : settings().chapter_minimum;
+  }  
+  // don't make a new chapter if it would be shorter than the specified minimal length
+  int chapter_max = quick_picture_lookup.back().outpicture - settings().chapter_minimum;
+
+  for(int outpic = chapter_start; outpic < chapter_max; outpic+=chapter_start) 
+    if (!quick_picture_lookup.empty()) {
+      // find the entry in the quick_picture_lookup table that corresponds to given output picture
+      it = std::upper_bound(quick_picture_lookup.begin(),quick_picture_lookup.end(),outpic,quick_picture_lookup_s::cmp_outpicture());
+      inpic = outpic - it->outpicture + it->stoppicture;   
+
+      if(inpic+settings().chapter_tolerance>it->stoppicture) {
+        if(it == quick_picture_lookup.end()) break;
+        // take begin of next START/STOP range as chapter picture if to near at end of current range
+        it++;
+        inpic=it->startpicture;
+      } else if(settings().chapter_tolerance>0) {  
+        // look for the next scene change inside specified frame tolerance (VERY SLOW!!!)
+        if (!imgp) 
+          imgp = new imageprovider(*mpg, new dvbcutbusy(this), false, viewscalefactor, settings().chapter_tolerance);
+        p2 = imgp->getimage(inpic,fine);  
+        for(int pic=inpic+1; pic<inpic+settings().chapter_tolerance && pic<pictures; pic++) {
+          // get next picture
+          p1 = p2;
+          p2 = imgp->getimage(pic,fine);
+          if (p2.size()!=p1.size())
+            p2=p2.scaled(p1.size());
+
+          // calculate color distance between two consecutive frames
+          double dist=0.;
+          if (p2.depth()==32 && p1.depth()==32)
+            for (int y=0;y<p1.height();++y) {
+              QRgb *col1=(QRgb*)p1.scanLine(y);
+              QRgb *col2=(QRgb*)p2.scanLine(y);
+
+              for (int x=p1.width();x>0;--x) {
+                dist+=sqrt(pow(qRed(*col1)-qRed(*col2),2)+pow(qGreen(*col1)-qGreen(*col2),2)+pow(qBlue(*col1)-qBlue(*col2),2));
+                // that's a bit faster...   
+                //dist+=(abs(qRed(*col1)-qRed(*col2))+abs(qGreen(*col1)-qGreen(*col2))+abs(qBlue(*col1)-qBlue(*col2)));
+                ++col1;
+                ++col2;
+              }
+            }
+          dist/=(p1.height()*p1.width());
+ 
+          // 50. seems to be a good measure for the color distance at scene changes (about sqrt(3)*50. if sum of abs values)! 
+          //fprintf(stderr,"%d, DIST=%f\n",pic,dist); 
+          if(dist>settings().chapter_threshold) { 
+            inpic=pic;
+            statusBar()->showMessage(QString().sprintf("%d. Scene change @ %d, DIST=%f\n",chapters+1,inpic,dist));   
+            break;
+          }  
+        }
+      }
+      
+      addEventListItem(inpic, EventListModel::Chapter);
+      chapters++;
+    }  
+
+  if (chapters)
+    update_quick_picture_lookup_table();
 }
 
-void dvbcut::editImport(void) {
-	// FIXME: implement
+void dvbcut::on_editSuggestAction_triggered(void) {
+  int pic = 0, found=0;
+  while ((pic = mpg->nextaspectdiscontinuity(pic)) >= 0) {
+    addEventListItem(pic, EventListModel::Bookmark);
+    found++;
+  }
+  if (!found)
+    statusBar()->showMessage(QString("*** No aspect ratio changes detected! ***"));
 }
 
-void dvbcut::editConvert(int) {
-	// FIXME: implement
+void dvbcut::on_editImportAction_triggered(void) {
+  int found=0;
+  std::vector<int> bookmarks = mpg->getbookmarks();
+  for (std::vector<int>::iterator b = bookmarks.begin(); b != bookmarks.end(); ++b) {   
+    addEventListItem(*b, EventListModel::Bookmark);
+    found++;
+  }
+  if (!found)  
+    statusBar()->showMessage(QString("*** No valid bookmarks available/found! ***"));
+}
+
+void dvbcut::on_editconvertpopup_triggered(QAction *action) {
+	editConvert(action->data().toInt());
+}
+
+void dvbcut::editConvert(int option) {
+  // convert Bookmarks to START/STOP markers
+  if(option<0 || option>3) return;
+  
+  int found=0;
+  std::vector<int> cutlist;
+	EventListModel::const_iterator item;
+
+	for (item = eventdata.constBegin(); item != eventdata.constEnd(); ++item) {
+		if (item->evtype == EventListModel::Bookmark) {
+			cutlist.push_back(item->pic);
+			found++;
+		}
+	}
+
+	eventdata.remove(EventListModel::Bookmark);
+
+  if (found) {
+    addStartStopItems(cutlist, option);
+
+    if (found%2) 
+      statusBar()->showMessage(QString("*** No matching stop marker!!! ***"));
+  }  
+  else
+    statusBar()->showMessage(QString("*** No bookmarks to convert! ***"));  
 }
 
 void dvbcut::on_viewNormalAction_triggered(void) {
