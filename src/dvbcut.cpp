@@ -1187,39 +1187,45 @@ void dvbcut::on_eventlist_customContextMenuRequested(const QPoint &pos) {
 	QModelIndex index = eventlist->indexAt(pos);
 	const EventListModel::EventListItem *item = eventdata[index];
 
-	if (!item) {
-		return;
-	}
-
 	QAction *action;
-	QMenu popup(eventlist);
+	QMenu popup(eventlist), *submenu;
 	EventListModel::EventType evtype;
 
-	popup.addAction("Go to")->setData(1);
-	popup.addAction("Delete")->setData(2);
-	popup.addAction("Delete others")->setData(3);
-	popup.addAction("Delete all")->setData(4);
-	popup.addAction("Delete all start/stops")->setData(5);
-	popup.addAction("Delete all chapters")->setData(6);
-	popup.addAction("Delete all bookmarks")->setData(7);
-
-	if (item->evtype != EventListModel::Start) {
-		popup.addAction("Convert to start marker")->setData(8);
+	if (item) {
+		popup.addAction("Go to")->setData(1);
+		popup.addAction("Delete")->setData(2);
+		submenu = popup.addMenu("Mass delete");
+		submenu->addAction("Delete others")->setData(3);
+	} else {
+		submenu = &popup;
 	}
 
-	if (item->evtype != EventListModel::Stop) {
-		popup.addAction("Convert to stop marker")->setData(9);
-	}
+	submenu->addAction("Delete all")->setData(4);
+	submenu->addAction("Delete all start/stops")->setData(5);
+	submenu->addAction("Delete all chapters")->setData(6);
+	submenu->addAction("Delete all bookmarks")->setData(7);
 
-	if (item->evtype != EventListModel::Chapter) {
-		popup.addAction("Convert to chapter marker")->setData(10);
-	}
+	if (item) {
+		submenu = popup.addMenu("Convert");
 
-	if (item->evtype != EventListModel::Bookmark) {
-		popup.addAction("Convert to bookmark")->setData(11);
-	}
+		if (item->evtype != EventListModel::Start) {
+			submenu->addAction("Convert to start marker")->setData(8);
+		}
 
-	popup.addAction("Display difference from this picture")->setData(12);
+		if (item->evtype != EventListModel::Stop) {
+			submenu->addAction("Convert to stop marker")->setData(9);
+		}
+
+		if (item->evtype != EventListModel::Chapter) {
+			submenu->addAction("Convert to chapter marker")->setData(10);
+		}
+
+		if (item->evtype != EventListModel::Bookmark) {
+			submenu->addAction("Convert to bookmark")->setData(11);
+		}
+
+		popup.addAction("Display difference from this picture")->setData(12);
+	}
 
 	// Shift by 2 pixels to avoid selecting the first action by accident
 	action = popup.exec(eventlist->mapToGlobal(pos) + QPoint(2,2));
