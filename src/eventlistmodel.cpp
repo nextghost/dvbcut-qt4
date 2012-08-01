@@ -95,6 +95,14 @@ void EventListModel::addItem(imageprovider *imgp, EventType evtype, int pic, int
 	endInsertRows();
 }
 
+const EventListModel::EventListItem *EventListModel::operator[](int idx) const {
+	return idx >= 0 && idx < _data.size() ? &_data[idx] : NULL;
+}
+
+const EventListModel::EventListItem *EventListModel::operator[](const QModelIndex &index) const {
+	return index.isValid() && index.row() >= 0 && index.row() < _data.size() ? &_data[index.row()] : NULL;
+}
+
 static QString itemstr(const EventListModel::EventListItem &item) {
 	QString ret = "%1<br>%2<br>%3 (%4)";
 

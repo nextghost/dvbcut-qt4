@@ -70,6 +70,9 @@ public:
 	QAbstractItemDelegate *delegate(void);
 	void addItem(imageprovider *imgp, EventType type, int pic, int pictype, pts_t pts);
 
+	const EventListItem *operator[](int idx) const;
+	const EventListItem *operator[](const QModelIndex &index) const;
+
 	const_iterator constBegin() const;
 	const_iterator constEnd() const;
 	void clear(void);

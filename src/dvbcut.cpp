@@ -1172,11 +1172,11 @@ void dvbcut::on_linslider_valueChanged(int newpic) {
 }
 
 void dvbcut::on_eventlist_activated(const QModelIndex &index) {
-	if (!index.isValid()) {
+	const EventListModel::EventListItem *item = eventdata[index];
+
+	if (!item) {
 		return;
 	}
-
-	EventListModel::EventListItem *item = (EventListModel::EventListItem *)index.internalPointer();
 
 	fine = true;
 	linslider->setValue(item->pic);
