@@ -95,6 +95,54 @@ void EventListModel::addItem(imageprovider *imgp, EventType evtype, int pic, int
 	endInsertRows();
 }
 
+void EventListModel::convert(QModelIndex &index, EventListModel::EventType evtype) {
+	if (!index.isValid() || index.row() < 0 || index.row() >= _data.size()) {
+		return;
+	}
+
+	_data[index.row()].evtype = evtype;
+	emit dataChanged(index, index);
+}
+
+void EventListModel::remove(QModelIndex &index) {
+	if (!index.isValid() || index.row() < 0 || index.row() >= _data.size()) {
+		return;
+	}
+
+	beginRemoveRows(QModelIndex(), index.row(), index.row());
+	_data.removeAt(index.row());
+	endRemoveRows();
+}
+
+void EventListModel::remove(EventType evtype) {
+	for (int i = 0; i < _data.size(); i++) {
+		while (i < _data.size() && _data[i].evtype == evtype) {
+			beginRemoveRows(QModelIndex(), i, i);
+			_data.removeAt(i);
+			endRemoveRows();
+		}
+	}
+}
+
+void EventListModel::removeOthers(QModelIndex &index) {
+	if (!index.isValid() || index.row() < 0 || index.row() >= _data.size()) {
+		clear();
+		return;
+	}
+
+	if (index.row() > 0) {
+		beginRemoveRows(QModelIndex(), 0, index.row() - 1);
+		_data.erase(_data.begin(), _data.begin() + index.row());
+		endRemoveRows();
+	}
+
+	if (_data.size() > 1) {
+		beginRemoveRows(QModelIndex(), 1, _data.size() - 1);
+		_data.erase(_data.begin() + 1, _data.end());
+		endRemoveRows();
+	}
+}
+
 const EventListModel::EventListItem *EventListModel::operator[](int idx) const {
 	return idx >= 0 && idx < _data.size() ? &_data[idx] : NULL;
 }

@@ -36,6 +36,9 @@
        <bool>false</bool>
       </property>
       <widget class="QListView" name="eventlist">
+       <property name="contextMenuPolicy">
+        <enum>Qt::CustomContextMenu</enum>
+       </property>
        <property name="verticalScrollMode">
         <enum>QAbstractItemView::ScrollPerPixel</enum>
        </property>

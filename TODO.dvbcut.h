@@ -69,7 +69,7 @@ public slots:
   virtual void jogslidervalue(int);	// DONE: on_jogslider_valueChanged()
   virtual void linslidervalue(int);	// In progress: on_linslider_valueChanged()
   virtual void doubleclickedeventlist(QListBoxItem *lbi);	// DONE: on_eventlist_activated()
-  virtual void eventlistcontextmenu(QListBoxItem *, const QPoint &);
+  virtual void eventlistcontextmenu(QListBoxItem *, const QPoint &);	// DONE: on_eventlist_customContextMenuRequested()
   virtual void mplayer_exited();
   virtual void mplayer_readstdout();
   virtual void clickedgo();			// DONE: on_gobutton_clicked()

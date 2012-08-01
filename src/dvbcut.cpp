@@ -1183,6 +1183,122 @@ void dvbcut::on_eventlist_activated(const QModelIndex &index) {
 	fine = false;
 }
 
+void dvbcut::on_eventlist_customContextMenuRequested(const QPoint &pos) {
+	QModelIndex index = eventlist->indexAt(pos);
+	const EventListModel::EventListItem *item = eventdata[index];
+
+	if (!item) {
+		return;
+	}
+
+	QAction *action;
+	QMenu popup(eventlist);
+	EventListModel::EventType evtype;
+
+	popup.addAction("Go to")->setData(1);
+	popup.addAction("Delete")->setData(2);
+	popup.addAction("Delete others")->setData(3);
+	popup.addAction("Delete all")->setData(4);
+	popup.addAction("Delete all start/stops")->setData(5);
+	popup.addAction("Delete all chapters")->setData(6);
+	popup.addAction("Delete all bookmarks")->setData(7);
+
+	if (item->evtype != EventListModel::Start) {
+		popup.addAction("Convert to start marker")->setData(8);
+	}
+
+	if (item->evtype != EventListModel::Stop) {
+		popup.addAction("Convert to stop marker")->setData(9);
+	}
+
+	if (item->evtype != EventListModel::Chapter) {
+		popup.addAction("Convert to chapter marker")->setData(10);
+	}
+
+	if (item->evtype != EventListModel::Bookmark) {
+		popup.addAction("Convert to bookmark")->setData(11);
+	}
+
+	popup.addAction("Display difference from this picture")->setData(12);
+
+	// Shift by 2 pixels to avoid selecting the first action by accident
+	action = popup.exec(eventlist->mapToGlobal(pos) + QPoint(2,2));
+
+	if (!action) {
+		return;
+	}
+
+	switch (action->data().toInt()) {
+	case 1:
+		fine = true;
+		linslider->setValue(item->pic);
+		fine = false;
+		break;
+
+	case 2:
+		evtype = item->evtype;
+		eventdata.remove(index);
+
+		if (evtype != EventListModel::Bookmark) {
+			update_quick_picture_lookup_table();
+		}
+		break;
+
+	case 3:
+		eventdata.removeOthers(index);
+		update_quick_picture_lookup_table();
+		break;
+
+	case 4:
+		eventdata.clear();
+		update_quick_picture_lookup_table();
+		break;
+
+	case 5:
+		eventdata.remove(EventListModel::Start);
+		eventdata.remove(EventListModel::Stop);
+		update_quick_picture_lookup_table();
+		break;
+
+	case 6:
+		eventdata.remove(EventListModel::Chapter);
+		update_quick_picture_lookup_table();
+		break;
+
+	case 7:
+		eventdata.remove(EventListModel::Bookmark);
+		update_quick_picture_lookup_table();
+		break;
+
+	case 8:
+		eventdata.convert(index, EventListModel::Start);
+		update_quick_picture_lookup_table();
+		break;
+
+	case 9:
+		eventdata.convert(index, EventListModel::Stop);
+		update_quick_picture_lookup_table();
+		break;
+
+	case 10:
+		eventdata.convert(index, EventListModel::Chapter);
+		update_quick_picture_lookup_table();
+		break;
+
+	case 11:
+		eventdata.convert(index, EventListModel::Bookmark);
+		update_quick_picture_lookup_table();
+		break;
+
+	case 12:
+		delete imgp;
+		imgp = new differenceimageprovider(*mpg, item->pic, new dvbcutbusy(this), false, viewscalefactor);
+		updateimagedisplay();
+		viewDifferenceAction->setChecked(true);
+		break;
+	}
+}
+
 void dvbcut::on_gobutton_clicked(void) {
 	QString text = goinput->text();
 	int inpic;

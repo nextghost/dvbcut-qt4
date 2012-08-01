@@ -151,6 +151,7 @@ public slots:
 	void on_jogslider_valueChanged(int);
 	void on_linslider_valueChanged(int);
 	void on_eventlist_activated(const QModelIndex&);
+	void on_eventlist_customContextMenuRequested(const QPoint&);
 	void on_gobutton_clicked();
 	void on_gobutton2_clicked();
 	void updateimagedisplay();
