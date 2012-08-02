@@ -344,6 +344,166 @@ void dvbcut::addEventListItem(int pic, EventListModel::EventType type) {
 	}
 }
 
+void dvbcut::snapshotSave(std::vector<int> piclist, int range, int samples) {
+  QString prefix;
+  QString type=settings().snapshot_type;
+  QString delim=settings().snapshot_delimiter;
+  QString ext=settings().snapshot_extension;
+  int first = settings().snapshot_first;
+  int width = settings().snapshot_width;
+  int quality = settings().snapshot_quality;
+
+  // get unique filename
+  if (picfilen.isEmpty()) {
+    if(settings().snapshot_prefix.isEmpty()) {
+      if (!prjfilen.empty())
+        prefix = QString::fromStdString(prjfilen);
+      else if (!mpgfilen.empty() && !mpgfilen.front().empty())
+        prefix = QString::fromStdString(mpgfilen.front());
+    } else
+      prefix = settings().snapshot_prefix;
+
+    if (!prefix.isEmpty()) {
+      int lastdot = prefix.lastIndexOf('.');
+      int lastslash = prefix.lastIndexOf('/');
+      if (lastdot >= 0 && lastdot > lastslash)
+        prefix = prefix.left(lastdot);
+      int nr = first;
+      picfilen = prefix + delim + QString::number(nr).rightJustified( width, '0' ) + "." + ext;
+      while (QFileInfo(picfilen).exists())
+        picfilen = prefix + delim + QString::number(++nr).rightJustified( width, '0' )+ "." + ext;
+    }
+  }  
+
+  QString s = QFileDialog::getSaveFileName(
+    this,
+    "Save picture as...",
+    picfilen,
+    "Images (*."+ext+")");
+
+  if (s.isEmpty())
+    return;
+
+  if (QFileInfo(s).exists() && question(
+    "File exists - dvbcut",
+    s + "\nalready exists. Overwrite?") !=
+    QMessageBox::Yes)
+    return;
+
+  QImage p;
+  int pic, i, nr;
+  bool ok=false;
+  for (std::vector<int>::iterator it = piclist.begin(); it != piclist.end(); ++it) {
+
+    if(samples>1 && range>0)
+      pic = chooseBestPicture(*it, range, samples);
+    else
+      pic = *it+range;
+
+    // save selected picture to file
+    if (imgp)
+      p = imgp->getimage(pic,fine);
+    else
+      p = imageprovider(*mpg, new dvbcutbusy(this), false, viewscalefactor).getimage(pic,fine);
+    if(p.save(s,type.toAscii(),quality))
+      statusBar()->showMessage("Saved snapshot: " + s);
+    else
+      statusBar()->showMessage("*** Unable to save snapshot: " + s + "! ***");
+ 
+    // try to "increment" the choosen filename for next snapshot (or use old name as default)
+    // No usage of "delim", so it's possible to choose any prefix in front of the number field!
+    i = s.lastIndexOf(QRegExp("\\d{"+QString::number(width)+","+QString::number(width)+"}\\."+ext+"$"));
+    if (i>0) {
+      nr = s.mid(i,width).toInt(&ok,10);
+      if (ok)
+        picfilen = s.left(i) + QString::number(++nr).rightJustified(width, '0')+ "." + ext;
+      else
+        picfilen = s;
+    }
+    else
+      picfilen = s;
+
+    s = picfilen;
+  }
+}
+
+int dvbcut::chooseBestPicture(int startpic, int range, int samples) {
+  QImage p;
+  QRgb col;
+  int idx, x, y, w, h, pic, norm, colors;
+  int r, g, b, nr=11, ng=16, nb=5;  // "borrowed" the weights from calc. of qGray = (11*r+16*g+5*b)/32
+  double entropy;
+  std::vector<double> histogram;
+
+  samples = samples>0 ? samples: 1;
+  samples = samples>abs(range) ? abs(range)+1: samples;
+
+  int bestpic = startpic+range, bestnr=0;
+  double bestval = 0.;
+  int dp = range/(samples-1);
+  int ncol = nr*ng*nb;
+
+  // choose the best picture among equidistant samples in the range (not for single snapshots!)
+  for (int n=0; n<samples && samples>1 && range>0; n++) {
+      pic = startpic+n*dp;
+
+      if (imgp)
+        p = imgp->getimage(pic,fine);
+      else
+        p = imageprovider(*mpg, new dvbcutbusy(this), false, viewscalefactor).getimage(pic,fine);
+
+      // get a measure for complexity of picture (at least good enough to discard single colored frames!)
+
+      // index color space and fill histogram
+      w = p.width();
+      h = p.height();
+      histogram.assign(ncol,0.);
+      for(x=0; x<w; x++)
+        for(y=0; y<h; y++) {
+          col=p.pixel(x,y);
+          r=nr*qRed(col)/256;
+          g=ng*qGreen(col)/256;
+          b=nb*qBlue(col)/256;
+          idx=r+nr*g+nr*ng*b;
+          histogram[idx]++;
+        }
+
+      // calc. probability to fall in a given color class
+      colors = 0;
+      norm = w*h;
+      for(unsigned int i=0; i<histogram.size(); i++)
+        if(histogram[i]>0) {
+          colors++;
+          histogram[i] /= norm;
+        }
+
+      // calc. the information entropy (complexity) of the picture
+      entropy = 0.;
+      for(x=0; x<w; x++)
+        for(y=0; y<h; y++) {
+          col=p.pixel(x,y);
+          r=nr*qRed(col)/256;
+          g=ng*qGreen(col)/256;
+          b=nb*qBlue(col)/256;
+          idx=r+nr*g+nr*ng*b;
+          entropy-=histogram[idx]*log(histogram[idx]);
+        }
+      entropy /= log(2.);
+
+      //fprintf(stderr,"frame %7d, sample %4d (%7d): %10d %10.2f\n",startpic,n,pic,colors,entropy);
+
+      // largest "information content"?
+      if(entropy>bestval) {
+        bestval=entropy;
+        bestpic=pic;
+        bestnr=n;
+      }
+  }
+  //fprintf(stderr,"choosing sample / frame: %4d / %7d\n!", bestnr, bestpic);
+
+  return bestpic;
+}
+
 dvbcut::dvbcut(QWidget *parent) : QMainWindow(parent, Qt::Window),
 	audioTrackGroup(new QActionGroup(this)),
 	buf(8 << 20, 128 << 20), mpg(NULL), pictures(0), curpic(~0),
@@ -1068,6 +1228,29 @@ void dvbcut::on_fileSaveAsAction_triggered(void) {
   prjfilen=s.toStdString();
   if (!prjfilen.empty())
     on_fileSaveAction_triggered();
+}
+
+void dvbcut::on_snapshotSaveAction_triggered(void) {
+  std::vector<int> piclist;
+  piclist.push_back(curpic);
+
+  snapshotSave(piclist);
+}
+
+void dvbcut::on_chapterSnapshotsSaveAction_triggered(void) {
+  std::vector<int> piclist;
+	EventListModel::const_iterator item;
+
+	for (item = eventdata.constBegin(); item != eventdata.constEnd(); ++item) {
+		if (item->evtype == EventListModel::Chapter) {
+			piclist.push_back(item->pic);
+		}
+	}
+
+  if (piclist.size()) {
+    snapshotSave(piclist, settings().snapshot_range, settings().snapshot_samples);
+  } else
+    statusBar()->showMessage(QString("*** No chapters to save! ***"));
 }
 
 void dvbcut::fileExport(void) {

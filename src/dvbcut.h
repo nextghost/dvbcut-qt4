@@ -119,6 +119,10 @@ protected:
 	// generic event item adder
 	void addEventListItem(int pic, EventListModel::EventType type);
 
+	// save given (or current) picture (or select the best from a given number of samples inside a range)
+	void snapshotSave(std::vector<int> piclist, int range=0, int samples=1);
+	int chooseBestPicture(int startpic, int range, int samples);
+
 public:
 	static bool cache_friendly;
 
@@ -137,6 +141,8 @@ public slots:
 	void on_fileOpenAction_triggered(void);
 	void on_fileSaveAction_triggered(void);
 	void on_fileSaveAsAction_triggered(void);
+	void on_snapshotSaveAction_triggered(void);
+	void on_chapterSnapshotsSaveAction_triggered(void);
 	void fileExport(void);
 	void editAddMarker(QAction *);
 	void on_editAutoChaptersAction_triggered();

@@ -17,8 +17,8 @@ protected:
 
   void addEventListItem(int pic, EventListItem::eventtype type);	// DONE
 
-  void snapshotSave(std::vector<int> piclist, int range=0, int samples=1);
-  int chooseBestPicture(int startpic, int range, int smaples);
+  void snapshotSave(std::vector<int> piclist, int range=0, int samples=1);	// DONE
+  int chooseBestPicture(int startpic, int range, int samples);	// DONE
 
 protected slots:
   virtual void helpAboutAction_activated();
@@ -39,8 +39,8 @@ public slots:
   virtual void fileOpen();	// DONE: on_fileOpenAction_triggered()
   virtual void fileSaveAs();	// DONE: on_fileSaveAsAction_triggered()
   virtual void fileSave();	// DONE: on_fileSaveAction_triggered()
-  virtual void snapshotSave();
-  virtual void chapterSnapshotsSave();
+  virtual void snapshotSave();	// DONE: on_snapshotSaveAction_triggered()
+  virtual void chapterSnapshotsSave();	// DONE: on_chapterSnapshotsSaveAction_triggered()
   virtual void fileExport();
   virtual void fileClose();	// DONE: direct connection in UI file
   virtual void editBookmark();	// DONE: editAddMarker()
