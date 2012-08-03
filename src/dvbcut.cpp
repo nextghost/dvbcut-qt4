@@ -32,6 +32,7 @@
 #include <QPixmap>
 #include <QRegExpValidator>
 #include <QWheelEvent>
+#include <QTextBrowser>
 
 bool dvbcut::cache_friendly = true;
 
@@ -64,6 +65,45 @@ public:
 
 		d->setbusy(busy);
 	}
+};
+
+class helpDialog : public QDialog {
+public:
+  helpDialog(QWidget *parent, QString file)
+  : QDialog(parent)
+  {
+    vbox = new QVBoxLayout(this);
+    resize(640, 480);
+    viewer = new QTextBrowser(this);
+    hbox = new QHBoxLayout();
+    prev = new QPushButton(tr("Prev"), this);
+    next = new QPushButton(tr("Next"), this);
+    home = new QPushButton(tr("Home"), this);
+    close = new QPushButton(tr("Close"), this);
+    close->setDefault(true);
+    vbox->addWidget(viewer);
+    vbox->addLayout(hbox);
+    hbox->addWidget(prev);
+    hbox->addWidget(next);
+    hbox->addWidget(home);
+    hbox->addWidget(close);
+    connect(prev, SIGNAL(clicked()), viewer, SLOT(backward()));
+    connect(viewer, SIGNAL(backwardAvailable(bool)), prev, SLOT(setEnabled(bool)));
+    connect(next, SIGNAL(clicked()), viewer, SLOT(forward()));
+    connect(viewer, SIGNAL(forwardAvailable(bool)), next, SLOT(setEnabled(bool)));
+    connect(home, SIGNAL(clicked()), viewer, SLOT(home()));
+    connect(close, SIGNAL(clicked()), this, SLOT(accept()));
+    viewer->setSource(file);
+    setWindowTitle(tr("dvbcut help"));
+    show();
+  }
+  virtual ~helpDialog() {
+  }
+private:
+  QVBoxLayout *vbox;
+  QHBoxLayout *hbox;
+  QTextBrowser *viewer;
+  QPushButton *prev, *next, *home, *close;
 };
 
 void dvbcut::setbusy(bool b) {
@@ -502,6 +542,47 @@ int dvbcut::chooseBestPicture(int startpic, int range, int samples) {
   //fprintf(stderr,"choosing sample / frame: %4d / %7d\n!", bestnr, bestpic);
 
   return bestpic;
+}
+
+void dvbcut::on_helpAboutAction_triggered(void) {
+  QMessageBox::about(this, tr("dvbcut"), 
+    tr("<head></head><body><span style=\"font-family: Helvetica,Arial,sans-serif;\">"
+      "<p>dvbcut Version %1</p>"
+      "eMail: <a href=\"mailto:dvbcut-user@lists.sourceforge.net?subject=Comment%20about%20dvbcut\">"
+      "dvbcut-user@lists.sourceforge.net</a></p>"
+      "<p>This program is free software; you can redistribute it and/or "
+      "modify it under the terms of the GNU General Public License as "
+      "published by the Free Software Foundation; either version 2 of "
+      "the License, or (at your option) any later version. This "
+      "program is distributed in the hope that it will be useful, "
+      "but WITHOUT ANY WARRANTY; without even the implied warranty of "
+      "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU "
+      "General Public License for more details.</p>"
+      "<p>You should have received a copy of the GNU General Public License along "
+      "with this program; if not, see "
+      "<a href=\"http://www.gnu.org/licenses/\">http://www.gnu.org/licenses/</a>.</p>"
+      "</span></body></html>").arg(VERSION_STRING));
+}
+
+void dvbcut::on_helpContentAction_triggered(void) {
+  QDir appDir(qApp->applicationDirPath());
+  // first search in the directory containing dvbcut
+  QString helpFile = appDir.absoluteFilePath("dvbcut_en.html");
+#ifndef __WIN32__
+  // Unix/Linux: search in the associated share subdirectory
+  if (!QFile::exists(helpFile)) {
+	appDir.cdUp();
+    helpFile = appDir.absoluteFilePath("share/help/dvbcut_en.html");
+  }
+#endif
+  if (QFile::exists(helpFile)) {
+    helpDialog dlg(this, helpFile);
+    dlg.exec();
+  }
+  else {
+    QMessageBox::information(this, tr("dvbcut"),
+      tr("Help file %1 not available").arg(helpFile));
+  }
 }
 
 dvbcut::dvbcut(QWidget *parent) : QMainWindow(parent, Qt::Window),

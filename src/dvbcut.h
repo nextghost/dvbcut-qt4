@@ -123,6 +123,10 @@ protected:
 	void snapshotSave(std::vector<int> piclist, int range=0, int samples=1);
 	int chooseBestPicture(int startpic, int range, int samples);
 
+protected slots:
+	void on_helpAboutAction_triggered(void);
+	void on_helpContentAction_triggered(void);
+
 public:
 	static bool cache_friendly;
 

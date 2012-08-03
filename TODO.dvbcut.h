@@ -21,8 +21,8 @@ protected:
   int chooseBestPicture(int startpic, int range, int samples);	// DONE
 
 protected slots:
-  virtual void helpAboutAction_activated();
-  virtual void helpContentAction_activated();
+  virtual void helpAboutAction_activated();	// DONE
+  virtual void helpContentAction_activated();	// DONE
 	
 public:
   ~dvbcut();	// In progress
