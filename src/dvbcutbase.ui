@@ -36,6 +36,9 @@
        <bool>false</bool>
       </property>
       <widget class="QListView" name="eventlist">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="contextMenuPolicy">
         <enum>Qt::CustomContextMenu</enum>
        </property>
@@ -473,6 +476,9 @@
    <property name="text">
     <string>&amp;Open</string>
    </property>
+   <property name="shortcut">
+    <string>O</string>
+   </property>
   </action>
   <action name="fileSaveAction">
    <property name="enabled">
@@ -485,6 +491,9 @@
    </property>
    <property name="text">
     <string>&amp;Save</string>
+   </property>
+   <property name="shortcut">
+    <string>S</string>
    </property>
   </action>
   <action name="fileSaveAsAction">
@@ -512,6 +521,9 @@
    <property name="text">
     <string>Save Snapshot</string>
    </property>
+   <property name="shortcut">
+    <string>G</string>
+   </property>
   </action>
   <action name="chapterSnapshotsSaveAction">
    <property name="enabled">
@@ -520,6 +532,9 @@
    <property name="text">
     <string>Save Chapter Snapshots</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
   </action>
   <action name="fileExportAction">
    <property name="enabled">
@@ -527,6 +542,9 @@
    </property>
    <property name="text">
     <string>Export video...</string>
+   </property>
+   <property name="shortcut">
+    <string>E</string>
    </property>
   </action>
   <action name="fileCloseAction">
@@ -537,6 +555,9 @@
    </property>
    <property name="text">
     <string>Close</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
   </action>
   <action name="editStartAction">
@@ -550,6 +571,9 @@
    <property name="text">
     <string>Set start marker</string>
    </property>
+   <property name="shortcut">
+    <string>A</string>
+   </property>
   </action>
   <action name="editStopAction">
    <property name="enabled">
@@ -561,6 +585,9 @@
    </property>
    <property name="text">
     <string>Set stop marker</string>
+   </property>
+   <property name="shortcut">
+    <string>N</string>
    </property>
   </action>
   <action name="editChapterAction">
@@ -574,6 +601,9 @@
    <property name="text">
     <string>Set chapter marker</string>
    </property>
+   <property name="shortcut">
+    <string>C</string>
+   </property>
   </action>
   <action name="editBookmarkAction">
    <property name="enabled">
@@ -586,6 +616,9 @@
    <property name="text">
     <string>Set bookmark</string>
    </property>
+   <property name="shortcut">
+    <string>B</string>
+   </property>
   </action>
   <action name="editAutoChaptersAction">
    <property name="enabled">
@@ -593,6 +626,9 @@
    </property>
    <property name="text">
     <string>Auto chapters</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
    </property>
   </action>
   <action name="editSuggestAction">
@@ -602,6 +638,9 @@
    <property name="text">
     <string>Suggest bookmarks</string>
    </property>
+   <property name="shortcut">
+    <string>M</string>
+   </property>
   </action>
   <action name="editImportAction">
    <property name="enabled">
@@ -609,6 +648,9 @@
    </property>
    <property name="text">
     <string>Import bookmarks</string>
+   </property>
+   <property name="shortcut">
+    <string>I</string>
    </property>
   </action>
   <action name="viewNormalAction">
@@ -621,6 +663,9 @@
    <property name="text">
     <string>Normal</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
   </action>
   <action name="viewUnscaledAction">
    <property name="checkable">
@@ -628,6 +673,9 @@
    </property>
    <property name="text">
     <string>Unscaled</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+U</string>
    </property>
   </action>
   <action name="viewDifferenceAction">
@@ -637,15 +685,24 @@
    <property name="text">
     <string>Show difference to current picture</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
   </action>
   <action name="zoomInAction">
    <property name="text">
     <string>Zoom in</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl++</string>
+   </property>
   </action>
   <action name="zoomOutAction">
    <property name="text">
     <string>Zoom out</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+-</string>
    </property>
   </action>
   <action name="viewFullSizeAction">
@@ -658,6 +715,9 @@
    <property name="text">
     <string>Full size</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+1</string>
+   </property>
   </action>
   <action name="viewHalfSizeAction">
    <property name="checkable">
@@ -665,6 +725,9 @@
    </property>
    <property name="text">
     <string>Half size</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+2</string>
    </property>
   </action>
   <action name="viewQuarterSizeAction">
@@ -674,6 +737,9 @@
    <property name="text">
     <string>Quarter size</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+4</string>
+   </property>
   </action>
   <action name="viewCustomSizeAction">
    <property name="checkable">
@@ -681,6 +747,9 @@
    </property>
    <property name="text">
     <string>Custom size</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+3</string>
    </property>
   </action>
   <action name="playPlayAction">
@@ -695,6 +764,9 @@
    <property name="text">
     <string>Play</string>
    </property>
+   <property name="shortcut">
+    <string>P</string>
+   </property>
   </action>
   <action name="playStopAction">
    <property name="enabled">
@@ -707,6 +779,9 @@
    </property>
    <property name="text">
     <string>Stop</string>
+   </property>
+   <property name="shortcut">
+    <string>Q</string>
    </property>
   </action>
   <action name="playAudio1Action">
@@ -724,6 +799,9 @@
    <property name="iconText">
     <string>Audio -&gt;|</string>
    </property>
+   <property name="shortcut">
+    <string>&gt;</string>
+   </property>
   </action>
   <action name="playAudio2Action">
    <property name="enabled">
@@ -740,6 +818,9 @@
    <property name="iconText">
     <string>Audio |-&gt;</string>
    </property>
+   <property name="shortcut">
+    <string>&lt;</string>
+   </property>
   </action>
   <action name="helpAboutAction">
    <property name="text">
@@ -749,6 +830,9 @@
   <action name="helpContentAction">
    <property name="text">
     <string>&amp;Contents</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
    </property>
   </action>
   <action name="actionFoo">
