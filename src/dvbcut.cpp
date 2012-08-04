@@ -673,6 +673,7 @@ dvbcut::dvbcut(QWidget *parent) : QMainWindow(parent, Qt::Window),
 
 	// install event handler
 	linslider->installEventFilter(this);
+	installEventFilter(this);
 
 	// set caption
 	setWindowTitle(QString(VERSION_STRING));

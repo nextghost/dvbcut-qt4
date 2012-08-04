@@ -265,6 +265,9 @@
     </item>
     <item>
      <widget class="QSlider" name="linslider">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="maximum">
        <number>180000</number>
       </property>
@@ -287,6 +290,9 @@
     </item>
     <item>
      <widget class="QSlider" name="jogslider">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="minimum">
        <number>-100000</number>
       </property>
