@@ -167,7 +167,16 @@ bool dvbcut::eventFilter(QObject *watched, QEvent *e) {
   else if (e->type() == QEvent::KeyPress) {
     QKeyEvent *ke = (QKeyEvent*)e;
     delta = ke->count() * settings().wheel_delta;
-    if (ke->key() == Qt::Key_Right)
+
+	if (ke->key() == Qt::Key_Delete && watched == eventlist) {
+		QModelIndex index = eventlist->selectionModel()->currentIndex();
+
+		if (index.isValid()) {
+			eventdata.remove(index);
+		}
+
+		return true;
+	} else if (ke->key() == Qt::Key_Right)
       delta = -delta;
     else if (ke->key() != Qt::Key_Left)
       myEvent = false;
@@ -673,6 +682,7 @@ dvbcut::dvbcut(QWidget *parent) : QMainWindow(parent, Qt::Window),
 
 	// install event handler
 	linslider->installEventFilter(this);
+	eventlist->installEventFilter(this);
 	installEventFilter(this);
 
 	// set caption
