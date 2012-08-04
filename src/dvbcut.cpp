@@ -153,7 +153,10 @@ bool dvbcut::eventFilter(QObject *watched, QEvent *e) {
   int delta = 0;
   int incr = WHEEL_INCR_NORMAL;
 
-  if (e->type() == QEvent::Wheel && watched != jogslider) {
+	if (e->type() == QEvent::Wheel && watched == eventlist) {
+		watched->event(e);
+		return true;
+	} else if (e->type() == QEvent::Wheel && watched != jogslider) {
     QWheelEvent *we = (QWheelEvent*)e;
     // Note: delta is a multiple of 120 (see Qt documentation)
     delta = we->delta();
