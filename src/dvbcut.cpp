@@ -23,6 +23,7 @@
 #include "busyindicator.h"
 #include "progressstatusbar.h"
 #include "differenceimageprovider.h"
+#include "ui_mplayererrorbase.h"
 
 #include <QFileDialog>
 #include <QDir>
@@ -104,6 +105,15 @@ private:
   QHBoxLayout *hbox;
   QTextBrowser *viewer;
   QPushButton *prev, *next, *home, *close;
+};
+
+class mplayererrorbase : public QDialog, public Ui::mplayererrorbase {
+public:
+	mplayererrorbase(QWidget *parent = NULL, Qt::WindowFlags f = 0) :
+		QDialog(parent, f) {
+
+		setupUi(this);
+	}
 };
 
 void dvbcut::setbusy(bool b) {
@@ -194,6 +204,11 @@ bool dvbcut::eventFilter(QObject *watched, QEvent *e) {
     myEvent = false;
 
   if (myEvent) {
+	// Playback active, just eat the event
+	if (mplayer_process) {
+		return true;
+	}
+
     // process scroll event myself
     incr = settings().wheel_increments[incr];
       if (incr != 0) {
@@ -601,7 +616,8 @@ dvbcut::dvbcut(QWidget *parent) : QMainWindow(parent, Qt::Window),
 	audioTrackGroup(new QActionGroup(this)),
 	buf(8 << 20, 128 << 20), mpg(NULL), pictures(0), curpic(~0),
 	showimage(true), fine(false), jogsliding(false), jogmiddlepic(0),
-	imgp(NULL), busy(0), viewscalefactor(1.0), nogui(false) {
+	mplayer_process(NULL), imgp(NULL), busy(0), viewscalefactor(1.0),
+	nogui(false) {
 
 	QActionGroup *group;
 	QAction *tmpAction;
@@ -697,6 +713,12 @@ dvbcut::dvbcut(QWidget *parent) : QMainWindow(parent, Qt::Window),
 }
 
 dvbcut::~dvbcut(void) {
+	if (mplayer_process) {
+		mplayer_process->terminate();
+		mplayer_process->waitForFinished();
+		delete mplayer_process;
+	}
+
 	delete imgp;
 	delete mpg;
 }
@@ -1528,6 +1550,99 @@ void dvbcut::setViewScaleMode(QAction *action) {
 	setviewscalefactor(scale > 0 ? scale : settings().viewscalefactor_custom);
 }
 
+void dvbcut::on_playStopAction_triggered(void) {
+  if (mplayer_process)
+    mplayer_process->terminate();
+}
+
+void dvbcut::on_playPlayAction_triggered(void) {
+  if (mplayer_process)
+    return;
+
+	QStringList args;
+
+  eventlist->setEnabled(false);
+  linslider->setEnabled(false);
+  jogslider->setEnabled(false);
+  gobutton->setEnabled(false);
+  goinput->setEnabled(false);
+  gobutton2->setEnabled(false);
+  goinput2->setEnabled(false);
+
+#ifdef HAVE_LIB_AO
+
+  playAudio1Action->setEnabled(false);
+  playAudio2Action->setEnabled(false);
+#endif // HAVE_LIB_AO
+
+  playPlayAction->setEnabled(false);
+  playStopAction->setEnabled(true);
+	audiotrackpopup->setEnabled(false);
+	recentfilespopup->setEnabled(false);
+
+  fileOpenAction->setEnabled(false);
+  fileSaveAction->setEnabled(false);
+  fileSaveAsAction->setEnabled(false);
+  snapshotSaveAction->setEnabled(false);
+  chapterSnapshotsSaveAction->setEnabled(false);
+  fileExportAction->setEnabled(false);
+
+  showimage=false;
+  imagedisplay->setPixmap(QPixmap());
+
+  fine=true;
+  linslider->setValue(mpg->lastiframe(curpic));
+  dvbcut_off_t offset=(*mpg)[curpic].getpos().packetposition();
+  mplayer_curpts=(*mpg)[curpic].getpts();
+
+  dvbcut_off_t partoffset;
+  int partindex = buf.getfilenum(offset, partoffset);
+  if (partindex == -1)
+    return;	// what else can we do?
+
+	args.push_back("-noconsolecontrols");
+#ifdef __WIN32__
+	args.push_back("-vo");
+	args.push_back("directx:noaccel");
+#endif
+	args.push_back("-wid");
+	args.push_back(QString().sprintf("0x%x", int(imagedisplay->winId())));
+	args.push_back("-sb");
+	args.push_back(QString::number(offset - partoffset));
+	args.push_back("-geometry");
+	args.push_back(QString().sprintf("%dx%d+0+0", int(imagedisplay->width()), int(imagedisplay->height())));
+
+	if (currentaudiotrack>=0 && currentaudiotrack<mpg->getaudiostreams()) {
+		args.push_back("-aid");
+		args.push_back(QString().sprintf("0x%x", int(mpg->mplayeraudioid(currentaudiotrack))));
+	}
+
+	// for now, pass all filenames from the current one up to the last one
+	std::list<std::string>::const_iterator it = mpgfilen.begin();
+	for (int i = 0; it != mpgfilen.end(); ++i, ++it) {
+		if (i >= partindex) {
+			args.push_back(QString::fromStdString(*it));
+		}
+	}
+
+	mplayer_process = new QProcess(this);
+	mplayer_process->setProcessChannelMode(QProcess::MergedChannels);
+	mplayer_process->setReadChannel(QProcess::StandardOutput);
+
+  connect(mplayer_process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(mplayer_exited(int, QProcess::ExitStatus)));
+  connect(mplayer_process, SIGNAL(readyReadStandardOutput()), this, SLOT(mplayer_readstdout()));
+
+  mplayer_success=false;
+  mplayer_process->start("mplayer", args);
+
+  if (!mplayer_process->waitForStarted()) {
+    delete mplayer_process;
+    mplayer_process=0;
+    mplayer_exited(1, QProcess::CrashExit);
+    return;
+  }
+}
+
 void dvbcut::on_jogslider_sliderReleased(void) {
 	jogsliding = false;
 	jogmiddlepic = curpic;
@@ -1736,6 +1851,109 @@ void dvbcut::on_eventlist_customContextMenuRequested(const QPoint &pos) {
 		viewDifferenceAction->setChecked(true);
 		break;
 	}
+}
+
+void dvbcut::mplayer_exited(int exitcode, QProcess::ExitStatus status) {
+  if (mplayer_process) {
+    if (!mplayer_success)// && !mplayer_process->normalExit())
+    {
+      mplayererrorbase *meb = new mplayererrorbase(this, Qt::Dialog);
+      meb->setAttribute(Qt::WA_DeleteOnClose);
+      meb->textbrowser->setText(mplayer_out);
+      meb->show();
+    }
+
+
+    delete mplayer_process;
+    mplayer_process=0;
+  }
+
+  eventlist->setEnabled(true);
+  linslider->setEnabled(true);
+  jogslider->setEnabled(true);
+  gobutton->setEnabled(true);
+  goinput->setEnabled(true);
+  gobutton2->setEnabled(true);
+  goinput2->setEnabled(true);
+
+#ifdef HAVE_LIB_AO
+
+  playAudio1Action->setEnabled(true);
+  playAudio2Action->setEnabled(true);
+#endif // HAVE_LIB_AO
+
+  playPlayAction->setEnabled(true);
+  playStopAction->setEnabled(false);
+	audiotrackpopup->setEnabled(true);
+	recentfilespopup->setEnabled(true);
+
+  fileOpenAction->setEnabled(true);
+  fileSaveAction->setEnabled(true);
+  fileSaveAsAction->setEnabled(true);
+  snapshotSaveAction->setEnabled(true);
+  chapterSnapshotsSaveAction->setEnabled(true);
+  fileExportAction->setEnabled(true);
+
+  int cp=curpic;
+  jogmiddlepic=curpic;
+  curpic=-1;
+  showimage=true;
+  fine=true;
+  on_linslider_valueChanged(cp);
+  linslider->setValue(cp);
+  fine=false;
+}
+
+void dvbcut::mplayer_readstdout(void) {
+  if (!mplayer_process)
+    return;
+
+  QString line(mplayer_process->readAllStandardOutput());
+  if (!line.length())
+    return;
+
+  if (!mplayer_success)
+    mplayer_out += line;
+
+  int pos=line.indexOf("V:");
+  if (pos<0)
+    return;
+
+  line.remove(0,pos+2);
+  line=line.trimmed();
+  for(pos=0;pos<(signed)line.length();++pos)
+    if ((line[pos]<'0' || line[pos]>'9')&&line[pos]!='.')
+      break;
+  line.truncate(pos);
+  if (line.length()==0)
+    return;
+
+  bool okay;
+  double d=line.toDouble(&okay);
+  if (d==0 || !okay)
+    return;
+
+  if (!mplayer_success) {
+    mplayer_success=true;
+    mplayer_out.truncate(0);
+  }
+  pts_t pts=mplayer_ptsreference(pts_t(d*90000.),mplayer_curpts);
+
+
+  if (pts==mplayer_curpts)
+    return;
+
+  int cp=curpic;
+
+  if (pts>mplayer_curpts) {
+    while (cp+1<pictures && pts>mplayer_curpts)
+      mplayer_curpts=(*mpg)[++cp].getpts();
+  } else if (pts<mplayer_curpts-18000) {
+    while (cp>1 && mplayer_curpts>pts)
+      mplayer_curpts=(*mpg)[--cp].getpts();
+  }
+
+  linslider->setValue(cp);
 }
 
 void dvbcut::on_gobutton_clicked(void) {

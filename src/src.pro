@@ -1,7 +1,7 @@
 TARGET = dvbcut
 SOURCES = avframe.cpp buffer.cpp differenceimageprovider.cpp dvbcut.cpp eventlistmodel.cpp exception.cpp gettext.cpp imageprovider.cpp index.cpp logoutput.cpp main.cpp mpgfile.cpp playaudio.cpp progressstatusbar.cpp psfile.cpp pts.cpp settings.cpp streamdata.cpp tsfile.cpp
 HEADERS = avframe.h buffer.h busyindicator.h defines.h differenceimageprovider.h dvbcut.h eventlistmodel.h exception.h gettext.h imageprovider.h index.h logoutput.h mpgfile.h muxer.h playaudio.h port.h progressstatusbar.h psfile.h pts.h settings.h stream.h streamdata.h streamhandle.h tsfile.h types.h ../ffmpeg.src/libavformat/avformat.h
-FORMS = dvbcutbase.ui
+FORMS = dvbcutbase.ui mplayererrorbase.ui
 RESOURCES = dvbcutbase.qrc
 CONFIG += link_pkgconfig
 QMAKE_CXXFLAGS += -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -D_FILE_OFFSET_BITS=64

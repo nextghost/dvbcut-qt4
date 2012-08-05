@@ -63,15 +63,15 @@ public slots:
   virtual void viewCustomSize();	// DONE: setViewScaleMode()
   virtual void playAudio2();
   virtual void playAudio1();
-  virtual void playStop();
-  virtual void playPlay();
+  virtual void playStop();		// DONE: on_playStopAction_triggered()
+  virtual void playPlay();		// DONE: on_playPlayAction_triggered()
   virtual void jogsliderreleased();	// DONE: on_jogslider_sliderReleased()
   virtual void jogslidervalue(int);	// DONE: on_jogslider_valueChanged()
   virtual void linslidervalue(int);	// In progress: on_linslider_valueChanged()
   virtual void doubleclickedeventlist(QListBoxItem *lbi);	// DONE: on_eventlist_activated()
   virtual void eventlistcontextmenu(QListBoxItem *, const QPoint &);	// DONE: on_eventlist_customContextMenuRequested()
-  virtual void mplayer_exited();
-  virtual void mplayer_readstdout();
+  virtual void mplayer_exited();	// DONE
+  virtual void mplayer_readstdout();	// DONE
   virtual void clickedgo();			// DONE: on_gobutton_clicked()
   virtual void clickedgo2();			// DONE: on_gobutton2_clicked()
   virtual void updateimagedisplay();		// DONE

@@ -23,6 +23,7 @@
 
 #include <string>
 #include <list>
+#include <QProcess>
 
 #include "ui_dvbcutbase.h"
 #include "version.h"
@@ -89,6 +90,10 @@ protected:
 	std::string prjfilen, idxfilen, expfilen;
 	QString picfilen;
 	std::list<std::string> mpgfilen;
+	QProcess *mplayer_process;
+	bool mplayer_success;
+	QString mplayer_out;
+	pts_t mplayer_curpts;
 	imageprovider *imgp;
 	int busy;
 	double viewscalefactor;
@@ -159,11 +164,15 @@ public slots:
 	void on_viewDifferenceAction_triggered();
 	void viewScaleZoom(QAction *);
 	void setViewScaleMode(QAction *);
+	void on_playStopAction_triggered(void);
+	void on_playPlayAction_triggered(void);
 	void on_jogslider_sliderReleased();
 	void on_jogslider_valueChanged(int);
 	void on_linslider_valueChanged(int);
 	void on_eventlist_activated(const QModelIndex&);
 	void on_eventlist_customContextMenuRequested(const QPoint&);
+	void mplayer_exited(int exitcode, QProcess::ExitStatus status);
+	void mplayer_readstdout(void);
 	void on_gobutton_clicked();
 	void on_gobutton2_clicked();
 	void updateimagedisplay();
