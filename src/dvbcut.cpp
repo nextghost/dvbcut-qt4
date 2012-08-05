@@ -23,6 +23,7 @@
 #include "busyindicator.h"
 #include "progressstatusbar.h"
 #include "differenceimageprovider.h"
+#include "exception.h"
 #include "ui_mplayererrorbase.h"
 
 #include <QFileDialog>
@@ -1548,6 +1549,34 @@ void dvbcut::setViewScaleMode(QAction *action) {
 
 	settings().viewscalefactor = scale;
 	setviewscalefactor(scale > 0 ? scale : settings().viewscalefactor_custom);
+}
+
+void dvbcut::on_playAudio2Action_triggered(void) {
+#ifdef HAVE_LIB_AO
+  qApp->processEvents();
+  try
+  {
+    mpg->playaudio(currentaudiotrack,curpic,2000);
+  }
+  catch (const dvbcut_exception &ex)
+  {
+    ex.show();
+  }
+#endif // HAVE_LIB_AO
+}
+
+void dvbcut::on_playAudio1Action_triggered(void) {
+#ifdef HAVE_LIB_AO
+  qApp->processEvents();
+  try
+  {
+    mpg->playaudio(currentaudiotrack,curpic,-2000);
+  }
+  catch (const dvbcut_exception &ex)
+  {
+    ex.show();
+  }
+#endif // HAVE_LIB_AO
 }
 
 void dvbcut::on_playStopAction_triggered(void) {

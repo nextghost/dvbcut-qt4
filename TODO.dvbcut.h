@@ -61,8 +61,8 @@ public slots:
   virtual void viewHalfSize();		// DONE: setViewScaleMode()
   virtual void viewQuarterSize();	// DONE: setViewScaleMode()
   virtual void viewCustomSize();	// DONE: setViewScaleMode()
-  virtual void playAudio2();
-  virtual void playAudio1();
+  virtual void playAudio2();		// DONE: on_playAudio2Action_triggered()
+  virtual void playAudio1();		// DONE: on_playAudio1Action_triggered()
   virtual void playStop();		// DONE: on_playStopAction_triggered()
   virtual void playPlay();		// DONE: on_playPlayAction_triggered()
   virtual void jogsliderreleased();	// DONE: on_jogslider_sliderReleased()

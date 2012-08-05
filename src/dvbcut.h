@@ -164,6 +164,8 @@ public slots:
 	void on_viewDifferenceAction_triggered();
 	void viewScaleZoom(QAction *);
 	void setViewScaleMode(QAction *);
+	void on_playAudio2Action_triggered(void);
+	void on_playAudio1Action_triggered(void);
 	void on_playStopAction_triggered(void);
 	void on_playPlayAction_triggered(void);
 	void on_jogslider_sliderReleased();
