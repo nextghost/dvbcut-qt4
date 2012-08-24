@@ -18,20 +18,27 @@
 
 /* $Id$ */
 
-#ifndef _DVBCUT_EXPORTDIALOG_H
-#define _DVBCUT_EXPORTDIALOG_H
+#include <QLineEdit>
+#include <QFileDialog>
+#include "exportdialog.h"
 
-#include <string>
-#include "exportdialogbase.h"
-
-class exportdialog: public exportdialogbase
+exportdialog::exportdialog(const QString &filename, QWidget *parent)
+    :QDialog(parent)
   {
-  Q_OBJECT
-public:
-  exportdialog(const std::string &filename, QWidget *parent = 0, const char *name = 0);
+  setupUi(this);
+  setModal(true);
+  filenameline->setText(filename);
+  }
 
-public slots:
-  virtual void fileselector();
-  };
+void exportdialog::on_filenamebrowsebutton_clicked() {
+  QString newfilename(QFileDialog::getSaveFileName(
+                        this,
+			"Export video...",
+                        filenameline->text(),
+                        "MPEG program streams (*.mpg)"
+                        ";;All files (*)"
+                        ));
 
-#endif
+  if (!newfilename.isNull())
+    filenameline->setText(newfilename);
+}

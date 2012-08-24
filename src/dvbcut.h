@@ -152,7 +152,7 @@ public slots:
 	void on_fileSaveAsAction_triggered(void);
 	void on_snapshotSaveAction_triggered(void);
 	void on_chapterSnapshotsSaveAction_triggered(void);
-	void fileExport(void);
+	void on_fileExportAction_triggered(void);
 	void editAddMarker(QAction *);
 	void on_editAutoChaptersAction_triggered();
 	void on_editSuggestAction_triggered(void);

@@ -22,7 +22,7 @@
 #define _DVBCUT_LAVFMUXER_H
 
 extern "C" {
-#include <avformat.h>
+#include <libavformat/avformat.h>
 }
 
 #include "mpgfile.h"
@@ -72,8 +72,13 @@ public:
     avp.pts=pts;
     avp.dts=dts;
     avp.stream_index=st[str].stream_index;
-    if (flags & MUXER_FLAG_KEY)
+    if (flags & MUXER_FLAG_KEY) {
+#if LIBAVCODEC_VERSION_INT >= ((53<<16)+(0<<8)+0)
+      avp.flags |= AV_PKT_FLAG_KEY;
+#else
       avp.flags |= PKT_FLAG_KEY;
+#endif
+    }
 
     int rv=av_interleaved_write_frame(avfc,&avp);
 

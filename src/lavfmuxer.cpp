@@ -19,8 +19,8 @@
 /* $Id$ */
 
 extern "C" {
-#include <avformat.h>
-#include <avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavcodec/avcodec.h>
 }
 #include <cstring>
 #include <utility>
@@ -30,6 +30,12 @@ extern "C" {
 #include "lavfmuxer.h"
 
 #include <stdio.h>
+
+#if LIBAVCODEC_VERSION_INT >= ((53<<16)+(0<<8)+0)
+	#define guess_format av_guess_format
+	#define av_alloc_format_context avformat_alloc_context
+	#define CODEC_TYPE_AUDIO AVMEDIA_TYPE_AUDIO
+#endif
 
 lavfmuxer::lavfmuxer(const char *format, uint32_t audiostreammask, mpgfile &mpg, const char *filename)
     : muxer(), avfc(0), fileopened(false)
@@ -92,13 +98,21 @@ lavfmuxer::lavfmuxer(const char *format, uint32_t audiostreammask, mpgfile &mpg,
 	    int16_t samples[AVCODEC_MAX_AUDIO_FRAME_SIZE/sizeof(int16_t)];
 	    int frame_size=sizeof(samples);
 	    //fprintf(stderr, "** decode audio size=%d\n", sd->inbytes());
-#if LIBAVCODEC_VERSION_INT >= ((52<<16)+(0<<8)+0)
+#if LIBAVCODEC_VERSION_INT >= ((53<<16)+(0<<8)+0)
+		AVPacket packet;
+		av_init_packet(&packet);
+		packet.data = (uint8_t*)sd->getdata();
+		packet.size = sd->inbytes();
+		avcodec_decode_audio3(s->codec, samples, &frame_size, &packet);
+#elif LIBAVCODEC_VERSION_INT >= ((52<<16)+(0<<8)+0)
 	    avcodec_decode_audio2
-#else
-	    avcodec_decode_audio
-#endif
 	      (s->codec,samples,&frame_size,
 	       (uint8_t*) sd->getdata(),sd->inbytes());
+#else
+	    avcodec_decode_audio
+	      (s->codec,samples,&frame_size,
+	       (uint8_t*) sd->getdata(),sd->inbytes());
+#endif
 	    avcodec_close(s->codec);
 	  }
 	  break;

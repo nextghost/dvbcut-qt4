@@ -25,7 +25,12 @@
 #include "differenceimageprovider.h"
 #include "exception.h"
 #include "ui_mplayererrorbase.h"
+#include "exportdialog.h"
+#include "progresswindow.h"
+#include "mpegmuxer.h"
+#include "lavfmuxer.h"
 
+#include <memory>
 #include <QFileDialog>
 #include <QDir>
 #include <QDomDocument>
@@ -1371,8 +1376,315 @@ void dvbcut::on_chapterSnapshotsSaveAction_triggered(void) {
     statusBar()->showMessage(QString("*** No chapters to save! ***"));
 }
 
-void dvbcut::fileExport(void) {
-	// FIXME: implement
+void dvbcut::on_fileExportAction_triggered(void) {
+  if (expfilen.empty()) {
+    std::string newexpfilen;
+
+    if (!prjfilen.empty())
+      newexpfilen=prjfilen;
+    else if (!mpgfilen.empty() && !mpgfilen.front().empty())
+      newexpfilen=mpgfilen.front();
+
+    if (!newexpfilen.empty()) {
+      int lastdot(newexpfilen.rfind("."));
+      int lastslash(newexpfilen.rfind("/"));
+      if (lastdot>=0 && lastslash<lastdot)
+        newexpfilen=newexpfilen.substr(0,lastdot);
+      expfilen=newexpfilen+".mpg";
+      int nr=0;
+      while (QFileInfo(QString::fromStdString(expfilen)).exists())
+        expfilen=newexpfilen+"_"+(QString::number(++nr).toStdString())+".mpg";
+    }
+  }
+
+  std::auto_ptr<exportdialog> expd(new exportdialog(QString::fromStdString(expfilen),this));
+  expd->muxercombo->addItem("MPEG program stream/DVD (DVBCUT multiplexer)");
+  expd->muxercombo->addItem("MPEG program stream (DVBCUT multiplexer)");
+  expd->muxercombo->addItem("MPEG program stream/DVD (libavformat)");
+  expd->muxercombo->addItem("MPEG transport stream (libavformat)");
+#ifndef __WIN32__
+  // add possible user configured pipe commands 
+  int pipe_items_start=expd->muxercombo->count();
+  for (unsigned int i = 0; i < settings().pipe_command.size(); ++i)
+    expd->muxercombo->addItem(settings().pipe_label[i]);
+#endif
+
+  if (settings().export_format < 0
+      || settings().export_format >= expd->muxercombo->count())
+    settings().export_format = 0;
+  expd->muxercombo->setCurrentIndex(settings().export_format);
+
+	expd->audiolist->setModel(mpg->audiomodel());
+	expd->audiolist->selectAll();
+
+  int expfmt = 0;
+  if (!nogui) {
+    expd->show();
+    if (!expd->exec())
+      return;
+
+    settings().export_format = expd->muxercombo->currentIndex();
+    expfmt = expd->muxercombo->currentIndex();
+
+    expfilen=expd->filenameline->text().toStdString();
+    if (expfilen.empty())
+      return;
+    expd->hide();
+  } else if (exportformat > 0 && exportformat < expd->muxercombo->count()) 
+    expfmt = exportformat;  
+
+  // create usable chapter lists 
+  std::string chapterstring, chaptercolumn;
+  if (!chapterlist.empty()) {
+    int nchar=0;
+    char chapter[16];
+    pts_t lastch=-1;
+    for(std::list<pts_t>::const_iterator it=chapterlist.begin();
+        it!=chapterlist.end();++it)
+      if (*it != lastch) {
+        lastch=*it;
+        // formatting the chapter string
+        if (nchar>0) {
+          nchar++; 
+          chapterstring+=",";
+          chaptercolumn+="\n";
+        }  
+        nchar+=sprintf(chapter,"%02d:%02d:%02d.%03d",
+                       int(lastch/(3600*90000)),
+                       int(lastch/(60*90000))%60,
+                       int(lastch/90000)%60,
+                       int(lastch/90)%1000	);
+        // append chapter marks to lists for plain text / dvdauthor xml-file         
+        chapterstring+=chapter;
+        chaptercolumn+=chapter;
+      }
+  }
+
+  int child_pid = -1;
+  int pipe_fds[2];
+
+#ifndef __WIN32__
+  // check for piped output
+  std::string expcmd;
+  size_t pos;
+  int ip=expfmt-pipe_items_start; 
+  if(ip>=0) {
+    expfmt=settings().pipe_format[ip];
+    if (settings().pipe_command[ip].indexOf('|')==-1) 
+      expcmd = "|"+settings().pipe_command[ip].toStdString();
+    else 
+      expcmd = settings().pipe_command[ip].toStdString();
+       
+    if ((pos=expcmd.find("%OUTPUT%"))!=std::string::npos)
+      expcmd.replace(pos,8,expfilen);  
+  } else 
+    expcmd = expfilen;
+
+  // chapter tag can also be used with input field pipes!
+  if ((pos=expcmd.find("%CHAPTERS%"))!=std::string::npos)
+    expcmd.replace(pos,10,chapterstring);  
+
+  if ((pos=expcmd.find('|'))!=std::string::npos) {
+    pos++;   
+    size_t end=expcmd.find(' ',pos);  
+    //if (!QFileInfo(expcmd.substr(pos,end-pos)).exists() ||
+    //    !QFileInfo(expcmd.substr(pos,end-pos)).isExecutable()) {
+    // better test if command is found in $PATH, so one don't needs to give the full path name
+    std::string which="which "+expcmd.substr(pos,end-pos)+" >/dev/null";
+    int irc = system(which.c_str());
+    if(irc!=0) { 
+      critical("Command not found - dvbcut","Problems with piped output to:\n"+QString::fromStdString(expcmd.substr(pos,end-pos)));
+      return; 
+    }       
+
+    if (::pipe(pipe_fds) < 0)
+      return;
+    child_pid = fork();
+    if (child_pid == 0) {
+      ::close(pipe_fds[1]);
+      if (pipe_fds[0] != STDIN_FILENO) {
+	dup2(pipe_fds[0], STDIN_FILENO);
+      }
+      //fprintf(stderr, "Executing %s\n", expcmd.c_str()+pos);
+      for (int fd=0; fd<256; ++fd)
+	if (fd != STDIN_FILENO && fd != STDOUT_FILENO && fd != STDERR_FILENO)
+	  ::close(fd);
+      execl("/bin/sh", "sh", "-c", expcmd.c_str()+pos, (char *)0);
+      _exit(127);
+    }
+    ::close(pipe_fds[0]);
+    if (child_pid < 0) {
+      ::close(pipe_fds[1]);
+      return;
+    }
+  } else
+#endif
+  if (QFileInfo(QString::fromStdString(expfilen)).exists() && question(
+      "File exists - dvbcut",
+      QString::fromStdString(expfilen)+"\nalready exists. "
+          "Overwrite?") !=
+      QMessageBox::Yes)
+    return;
+
+  progresswindow *prgwin = 0;
+  logoutput *log;
+  if (nogui) {
+    log = new logoutput;
+  }
+  else {
+    prgwin = new progresswindow(this);
+    prgwin->setWindowTitle(QString::fromStdString("export - " + expfilen));
+    log = prgwin;
+  }
+
+  //   lavfmuxer mux(fmt,*mpg,outfilename);
+
+  std::auto_ptr<muxer> mux;
+  uint32_t audiostreammask(0);
+	QModelIndexList streamsel = expd->audiolist->selectionModel()->selectedRows();
+
+	for (QModelIndexList::iterator it = streamsel.begin(); it != streamsel.end(); ++it) {
+		audiostreammask |= 1u << it->row();
+	}
+
+  std::string out_file = (child_pid < 0) ? expfilen :
+    std::string("pipe:") + QString::number(pipe_fds[1]).toStdString();
+
+  switch(expfmt) {
+    case 1:
+      mux=std::auto_ptr<muxer>(new mpegmuxer(audiostreammask,*mpg,out_file.c_str(),false,0));
+      break;
+    case 2:
+      mux=std::auto_ptr<muxer>(new lavfmuxer("dvd",audiostreammask,*mpg,out_file.c_str()));
+      break;
+    case 3:
+      mux=std::auto_ptr<muxer>(new lavfmuxer("mpegts",audiostreammask,*mpg,out_file.c_str()));
+      break;
+    case 0:
+    default:
+      mux=std::auto_ptr<muxer>(new mpegmuxer(audiostreammask,*mpg,out_file.c_str()));
+      break;
+  }
+
+  if (!mux->ready()) {
+#ifndef __WIN32__
+    if (child_pid > 0) {
+      ::close(pipe_fds[1]);
+      int wstatus;
+      while (waitpid(child_pid, &wstatus, 0)==-1 && errno==EINTR);
+    }
+#endif
+    log->printerror("Unable to set up muxer!");
+    if (nogui)
+      delete log;
+    else {
+      prgwin->finish();
+      delete prgwin;
+    }
+    return;
+  }
+
+  // starting export, switch source to sequential mode
+  buf.setsequential(cache_friendly);
+
+  int startpic, stoppic, savedpic=0;
+  pts_t startpts=(*mpg)[0].getpts(), stoppts, savedtime=0;
+
+  for(unsigned int num=0; num<quick_picture_lookup.size(); num++) {
+      startpic=quick_picture_lookup[num].startpicture;
+      startpts=quick_picture_lookup[num].startpts;
+      stoppic=quick_picture_lookup[num].stoppicture;
+      stoppts=quick_picture_lookup[num].stoppts;
+      
+      log->printheading("%d. Exporting %d pictures: %s .. %s",
+			num+1,stoppic-startpic,ptsstring(startpts).c_str(),ptsstring(stoppts).c_str());
+      mpg->savempg(*mux,startpic,stoppic,savedpic,quick_picture_lookup.back().outpicture,log);
+
+      savedpic=quick_picture_lookup[num].outpicture;
+      savedtime=quick_picture_lookup[num].outpts;
+  }
+
+  mux.reset();
+
+  log->printheading("Saved %d pictures (%02d:%02d:%02d.%03d)",savedpic,
+		    int(savedtime/(3600*90000)),
+		    int(savedtime/(60*90000))%60,
+		    int(savedtime/90000)%60,
+		    int(savedtime/90)%1000	);
+
+#ifndef __WIN32__
+  if (child_pid > 0) {
+    ::close(pipe_fds[1]);
+    int wstatus;
+    while (waitpid(child_pid, &wstatus, 0)==-1 && errno==EINTR);
+  }
+
+  // do some post processing if requested
+  if (ip>=0 && !settings().pipe_post[ip].isEmpty()) {
+    expcmd = settings().pipe_post[ip].toStdString();
+       
+    if ((pos=expcmd.find("%OUTPUT%"))!=std::string::npos)
+      expcmd.replace(pos,8,expfilen);  
+    if ((pos=expcmd.find("%CHAPTERS%"))!=std::string::npos)
+      expcmd.replace(pos,10,chapterstring);  
+
+    pos=expcmd.find(' ');  
+    std::string which="which "+expcmd.substr(0,pos)+" >/dev/null";
+
+    log->print("");
+    log->printheading("Performing post processing");
+    int irc = system(which.c_str());
+
+    if(irc!=0) { 
+      critical("Command not found - dvbcut","Problems with post processing command:\n"+QString::fromStdString(expcmd.substr(0,pos)));
+      log->print("Command not found!");
+    } else {      
+      int irc = system(expcmd.c_str());
+      if(irc!=0) { 
+        critical("Post processing error - dvbcut","Post processing command:\n"+
+                 QString::fromStdString(expcmd)+"\n returned non-zero exit code: " +QString::number(irc));
+        log->print("Command reported some problems... please check!");
+      } 
+      //else      
+      //  log->print("Everything seems to be OK...");
+    }
+  }   
+#endif
+
+  // print plain list of chapter marks
+  log->print("");
+  log->printheading("Chapter list");
+  log->print(chaptercolumn.c_str());
+
+  // simple dvdauthor xml file with chapter marks
+  std::string filename,destname;
+  if (expfilen.rfind("/")<expfilen.length()) 
+    filename=expfilen.substr(expfilen.rfind("/")+1);
+  else 
+    filename=expfilen;
+  destname=filename.substr(0,filename.rfind("."));
+  log->print("");
+  log->printheading("Simple XML-file for dvdauthor with chapter marks");
+  log->print("<dvdauthor dest=\"%s\">",destname.c_str());
+  log->print("  <vmgm />");
+  log->print("  <titleset>");
+  log->print("    <titles>");
+  log->print("      <pgc>");
+  log->print("        <vob file=\"%s\" chapters=\"%s\" />",filename.c_str(),chapterstring.c_str());
+  log->print("      </pgc>");
+  log->print("    </titles>");
+  log->print("  </titleset>");
+  log->print("</dvdauthor>");
+
+  if (nogui)
+    delete log;
+  else {
+    prgwin->finish();
+    delete prgwin;
+  }
+
+  // done exporting, switch back to random mode
+  buf.setsequential(false);
 }
 
 void dvbcut::editAddMarker(QAction *action) {

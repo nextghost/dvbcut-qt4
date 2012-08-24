@@ -22,11 +22,11 @@
 #define _DVBCUT_PROGRESSWINDOW_H
 
 #include <string>
-#include <qstring.h>
-#include "progresswindowbase.h"
+#include <QString>
+#include "ui_progresswindowbase.h"
 #include "logoutput.h"
 
-class progresswindow: public progresswindowbase, public logoutput
+class progresswindow: public QDialog, public Ui::progresswindowbase, public logoutput
   {
   Q_OBJECT
 protected:
@@ -36,7 +36,7 @@ protected:
   static QString quotetext(const char* text);
   void closeEvent(QCloseEvent *e);
 public:
-  progresswindow(QWidget *parent = 0, const char *name = 0);
+  progresswindow(QWidget *parent = 0);
   virtual bool cancelled()
     {
     return cancelwasclicked;
@@ -50,7 +50,7 @@ public:
 
 public slots:
   virtual void setprogress(int permille);
-  virtual void clickedcancel();
+  virtual void on_cancelbutton_clicked();
   };
 
 #endif

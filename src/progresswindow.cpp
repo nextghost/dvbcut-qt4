@@ -26,33 +26,28 @@
 #include <cstdarg>
 #include <cstdlib>
 
-#include <qprogressbar.h>
-#include <qtextbrowser.h>
-#include <qpushbutton.h>
-#include <qapplication.h>
+#include <QProgressBar>
+#include <QTextBrowser>
+#include <QPushButton>
+#include <QApplication>
+#include <QCloseEvent>
 #include "progresswindow.h"
 
-progresswindow::progresswindow(QWidget *parent, const char *name)
-    :progresswindowbase(parent, name, true), logoutput(),
+progresswindow::progresswindow(QWidget *parent)
+    : QDialog(parent), logoutput(),
     cancelwasclicked(false), waitingforclose(false)
   {
-  QStyleSheetItem *item;
-  item = new QStyleSheetItem( logbrowser->styleSheet(), "h" );
-  item->setFontWeight( QFont::Bold );
-  item->setFontUnderline( TRUE );
+	setupUi(this);
 
-  item = new QStyleSheetItem( logbrowser->styleSheet(), "info" );
+	QPalette pal = cancelbutton->palette();
+	pal.setColor(QPalette::Button, QColor(255, 0, 0));
+	pal.setColor(QPalette::Light, QColor(255, 64, 64));
+	pal.setColor(QPalette::Midlight, QColor(255, 32, 32));
+	pal.setColor(QPalette::Dark, QColor(191, 0, 0));
+	pal.setColor(QPalette::Mid, QColor(223, 0, 0));
+	cancelbutton->setPalette(pal);
 
-  item = new QStyleSheetItem( logbrowser->styleSheet(), "warn" );
-  item->setColor( "red" );
-
-  item = new QStyleSheetItem( logbrowser->styleSheet(), "error" );
-  item->setColor( "red" );
-  item->setFontWeight( QFont::Bold );
-  item->setFontUnderline( TRUE );
-
-  cancelbutton->setPaletteBackgroundColor( QColor( 255,0,0 ) );
-
+	setModal(true);
   show();
   qApp->processEvents();
   }
@@ -67,10 +62,17 @@ void progresswindow::closeEvent(QCloseEvent *e)
 
 void progresswindow::finish()
   {
+	QPalette pal = cancelbutton->palette();
+
+	pal.setColor(QPalette::Button, QColor(0, 255, 0));
+	pal.setColor(QPalette::Light, QColor(64, 255, 64));
+	pal.setColor(QPalette::Midlight, QColor(32, 255, 32));
+	pal.setColor(QPalette::Dark, QColor(0, 191, 0));
+	pal.setColor(QPalette::Mid, QColor(0, 223, 0));
   cancelbutton->setEnabled(false);
   waitingforclose=true;
   cancelbutton->setText( tr( "Close" ) );
-  cancelbutton->setPaletteBackgroundColor( QColor( 0,255,0 ) );
+	cancelbutton->setPalette(pal);
   cancelbutton->setEnabled(true);
   exec();
   }
@@ -80,7 +82,7 @@ void progresswindow::setprogress(int permille)
   if (permille==currentprogress)
     return;
   currentprogress=permille;
-  progressbar->setProgress(permille);
+  progressbar->setValue(permille);
   qApp->processEvents();
   }
 
@@ -92,10 +94,9 @@ void progresswindow::print(const char *fmt, ...)
   if (vasprintf(&text,fmt,ap)<0 || (text==0))
     return;
 
-  if (*text)
-    logbrowser->append(quotetext(text));
-  else
-    logbrowser->append("<br>");
+	logbrowser->setCurrentCharFormat(QTextCharFormat());
+	logbrowser->insertPlainText(QString(text) + "\n");
+	logbrowser->ensureCursorVisible();
   free(text);
   qApp->processEvents();
   }
@@ -105,10 +106,16 @@ void progresswindow::printheading(const char *fmt, ...)
   va_list ap;
   va_start(ap,fmt);
   char *text=0;
+	QTextCharFormat cf;
+
   if (vasprintf(&text,fmt,ap)<0 || (text==0))
     return;
 
-  logbrowser->append(QString("<h>")+quotetext(text)+"</h>");
+	cf.setUnderlineStyle(QTextCharFormat::SingleUnderline);
+	cf.setFontWeight(700);
+	logbrowser->setCurrentCharFormat(cf);
+  logbrowser->insertPlainText(QString(text) + "\n");
+	logbrowser->ensureCursorVisible();
   free(text);
   qApp->processEvents();
   }
@@ -118,10 +125,13 @@ void progresswindow::printinfo(const char *fmt, ...)
   va_list ap;
   va_start(ap,fmt);
   char *text=0;
+
   if (vasprintf(&text,fmt,ap)<0 || (text==0))
     return;
 
-  logbrowser->append(QString("<info>")+quotetext(text)+"</info>");
+	logbrowser->setCurrentCharFormat(QTextCharFormat());
+  logbrowser->insertPlainText(QString(text) + "\n");
+	logbrowser->ensureCursorVisible();
   free(text);
   qApp->processEvents();
   }
@@ -131,10 +141,17 @@ void progresswindow::printerror(const char *fmt, ...)
   va_list ap;
   va_start(ap,fmt);
   char *text=0;
+	QTextCharFormat cf;
+
   if (vasprintf(&text,fmt,ap)<0 || (text==0))
     return;
 
-  logbrowser->append(QString("<error>")+quotetext(text)+"</error>");
+	cf.setUnderlineStyle(QTextCharFormat::SingleUnderline);
+	cf.setFontWeight(700);
+	logbrowser->setCurrentCharFormat(cf);
+	logbrowser->setTextColor(Qt::red);
+  logbrowser->insertPlainText(QString(text) + "\n");
+	logbrowser->ensureCursorVisible();
   free(text);
   qApp->processEvents();
   }
@@ -147,20 +164,30 @@ void progresswindow::printwarning(const char *fmt, ...)
   if (vasprintf(&text,fmt,ap)<0 || (text==0))
     return;
 
-  logbrowser->append(QString("<warn>")+quotetext(text)+"</warn>");
+	logbrowser->setCurrentCharFormat(QTextCharFormat());
+	logbrowser->setTextColor(Qt::red);
+  logbrowser->insertPlainText(QString(text) + "\n");
+	logbrowser->ensureCursorVisible();
   free(text);
   qApp->processEvents();
   }
 
-void progresswindow::clickedcancel()
+void progresswindow::on_cancelbutton_clicked()
   {
   if ((cancelwasclicked==false) && (waitingforclose==false)) {
+	QPalette pal = cancelbutton->palette();
+
+	pal.setColor(QPalette::Button, QColor(0, 255, 0));
+	pal.setColor(QPalette::Light, QColor(64, 255, 64));
+	pal.setColor(QPalette::Midlight, QColor(32, 255, 32));
+	pal.setColor(QPalette::Dark, QColor(0, 191, 0));
+	pal.setColor(QPalette::Mid, QColor(0, 223, 0));
     // button function is cancel
     cancelwasclicked=true;
     cancelbutton->setEnabled(false);
     qApp->processEvents();
     cancelbutton->setText( tr( "Close" ) );
-    cancelbutton->setPaletteBackgroundColor( QColor( 0,255,0 ) );
+	cancelbutton->setPalette(pal);
     cancelbutton->setEnabled(true);
   } else {
     // button function is close

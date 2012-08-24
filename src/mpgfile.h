@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <QAbstractListModel>
 
 #include "port.h"
 #include "buffer.h"
@@ -40,6 +41,18 @@ class avframe;
 class muxer;
 class logoutput;
 
+class StreamModel : public QAbstractListModel {
+private:
+	const stream *_data;
+	const int &_size;
+
+public:
+	StreamModel(const stream *data, const int &size);
+
+	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+	int rowCount(const QModelIndex &parent = QModelIndex()) const;
+};
+
 class mpgfile
   {
 public:
@@ -51,6 +64,7 @@ protected:
   int initialoffset;
   class index idx;
   int pictures;
+  StreamModel _audiomodel;
 
   mpgfile(inbuffer &b, int initial_offset);
 
@@ -211,6 +225,10 @@ public:
     {
 	return idx.getheight(res); 
     }	
+
+	StreamModel *audiomodel(void) {
+		return &_audiomodel;
+	}
 
   void decodegop(int start, int stop, std::list<avframe*> &framelist);
   void initaudiocodeccontext(int aud);

@@ -259,7 +259,7 @@ main(int argc, char *argv[]) {
           main->addStartStopItems(piclist);
       }  
     }  
-    main->fileExport();
+    main->on_fileExportAction_triggered();
     rv = 0;
   }
   else {

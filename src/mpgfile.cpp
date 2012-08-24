@@ -58,10 +58,28 @@ const int mpgfile::frameratescr[16]=
     1080000,1080000,1080000,1080000,1080000,1080000,1080000
   };
 
+StreamModel::StreamModel(const stream *data, const int &size) : _data(data),
+	_size(size) {
+
+}
+
+QVariant StreamModel::data(const QModelIndex &index, int role) const {
+	if (role != Qt::DisplayRole || !index.isValid() || index.row() >= _size || index.row() < 0) {
+		return QVariant();
+	}
+
+	return QString::fromStdString(_data[index.row()].getinfo());
+}
+
+int StreamModel::rowCount(const QModelIndex &parent) const {
+	return parent.isValid() ? 0 : _size;
+}
+
 mpgfile::mpgfile(inbuffer &b, int initial_offset)
     : buf(b),
     videostreams(0),audiostreams(0),
-    initialoffset(initial_offset),idx(*this),pictures(0)
+    initialoffset(initial_offset),idx(*this),pictures(0),
+    _audiomodel(s + audiostream(0), audiostreams)
 {}
 
 mpgfile::~mpgfile()
