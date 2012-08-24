@@ -392,12 +392,21 @@ int dvbcut::critical(const QString & caption, const QString & text) {
 }
 
 void dvbcut::make_canonical(std::string &filename) {
-	QDir dir(filename.c_str());
-	QString fname = dir.dirName();
-	dir.cdUp();
-	dir = QDir(dir.canonicalPath());
+	QFileInfo finfo(QString::fromStdString(filename));
 
-	filename = dir.filePath(fname).toStdString();
+	if (finfo.exists()) {
+		filename = finfo.canonicalFilePath().toStdString();
+		return;
+	}
+
+	// File does not exist, find canonical dir path and append filename
+	QDir dir = finfo.path();
+
+	// If parent directory doesn't exist either, do nothing
+	if (dir.exists()) {
+		dir = QDir(dir.canonicalPath());
+		filename = dir.filePath(finfo.fileName()).toStdString();
+	}
 }
 
 void dvbcut::make_canonical(std::list<std::string> &filenames) {
