@@ -33,7 +33,7 @@ exportdialog::exportdialog(const QString &filename, QWidget *parent)
 void exportdialog::on_filenamebrowsebutton_clicked() {
   QString newfilename(QFileDialog::getSaveFileName(
                         this,
-			"Export video...",
+			tr("Export video..."),
                         filenameline->text(),
                         "MPEG program streams (*.mpg)"
                         ";;All files (*)"

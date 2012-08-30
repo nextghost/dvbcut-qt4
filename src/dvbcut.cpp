@@ -459,7 +459,7 @@ void dvbcut::snapshotSave(std::vector<int> piclist, int range, int samples) {
 
   QString s = QFileDialog::getSaveFileName(
     this,
-    "Save picture as...",
+    tr("Choose the name of the picture file"),
     picfilen,
     "Images (*."+ext+")");
 
@@ -742,7 +742,7 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
   if (filenames.empty()) {
     QStringList fn = QFileDialog::getOpenFileNames(
       this,
-      "Open file...",
+      tr("Choose one or more MPEG files to open"),
       settings().lastdir,
       settings().loadfilter);
     if (fn.empty()) {
@@ -973,7 +973,7 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
 
 	  QString s=QFileDialog::getSaveFileName(
 		  this,
-		  "Choose index file...",
+		  tr("Choose the name of the index file"),
 		  "file:" + relname,
 		  settings().idxfilter,
 		  NULL,
@@ -1333,7 +1333,7 @@ void dvbcut::on_fileSaveAsAction_triggered(void) {
 
   QString s=QFileDialog::getSaveFileName(
     this,
-    "Save project as...",
+    tr("Choose the name of the project file"),
     QString::fromStdString(prjfilen),
     settings().prjfilter);
 
