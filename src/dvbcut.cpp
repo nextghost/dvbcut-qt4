@@ -753,19 +753,11 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
     for (QStringList::Iterator it = fn.begin(); it != fn.end(); ++it)
       filenames.push_back(it->toStdString());
 
-/* FIXME: rewrite
-    // remember last directory if requested
-    if (settings().lastdir_update) {
-      QString dir = fn.front();
-      int n = dir.findRev('/');
-      if (n > 0)
-        dir = dir.left(n);
-      // adding a slash is NEEDED for top level directories (win or linux), and doesn't matter otherwise!
-      dir = dir + "/"; 
-      settings().lastdir = dir;
-    }
-*/
-  } 
+	if (settings().lastdir_update) {
+		QFileInfo info(fn.front());
+		settings().lastdir = info.canonicalPath();
+	}
+  }
 
   make_canonical(filenames);
 
