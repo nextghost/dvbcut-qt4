@@ -1155,7 +1155,6 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
   fileCloseAction->setEnabled(true);
   fileExportAction->setEnabled(true);
   playPlayAction->setEnabled(true);
-//  menubar->setItemEnabled(audiotrackmenuid,true);
   audiotrackpopup->setEnabled(true);
   playStopAction->setEnabled(false);
   editStartAction->setEnabled(true);
