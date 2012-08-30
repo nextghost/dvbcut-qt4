@@ -764,7 +764,7 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
   std::string filename = filenames.front();
 
   // a valid file name has been entered
-  setWindowTitle((VERSION_STRING " - " + filename).c_str());
+  setWindowTitle(QString::fromStdString(VERSION_STRING " - " + filename));
 
   // reset inbuffer
   buf.reset();
@@ -841,7 +841,7 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
   std::string prjfilename;
   QDomDocument domdoc;
   {
-    QFile fr(filename.c_str());
+    QFile fr(QString::fromStdString(filename));
     if (fr.open(QIODevice::ReadOnly)) {
 	QTextStream infile(&fr);
       QString line;
@@ -858,7 +858,7 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
           QDomElement docelem = domdoc.documentElement();
           if (docelem.tagName() != "dvbcut") {
             critical("Failed to read project file - dvbcut",
-	      QString(filename.c_str()) + ":\nNot a valid dvbcut project file");
+	      QString::fromStdString(filename) + ":\nNot a valid dvbcut project file");
             fileOpenAction->setEnabled(true);
             return;
           }
@@ -915,7 +915,7 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
 	  // sanity check
 	  if (filenames.empty()) {
 	    critical("Failed to read project file - dvbcut",
-	      QString(filename.c_str()) + ":\nNo MPEG filename given in project file");
+	      QString::fromStdString(filename) + ":\nNo MPEG filename given in project file");
 	    fileOpenAction->setEnabled(true);
 	    return;
 	  }
@@ -923,7 +923,7 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
         }
         else {
           critical("Failed to read project file - dvbcut",
-	    QString(filename.c_str()) + ":\n" + errormsg);
+	    QString::fromStdString(filename) + ":\n" + errormsg);
           fileOpenAction->setEnabled(true);
           return;
         }
@@ -949,7 +949,7 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
   busy.setbusy(false);
 
   if (!mpg) {
-    critical("Failed to open file - dvbcut", errormessage.c_str());
+    critical("Failed to open file - dvbcut", QString::fromStdString(errormessage));
     fileOpenAction->setEnabled(true);
     return;
   }
@@ -965,7 +965,7 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
 	   * filename as a relative file: URL. Otherwise, filenames that
 	   * contain ":" will not be handled correctly. --mr
 	   */
-	QDir dir(idxfilename.c_str());
+	QDir dir(QString::fromStdString(idxfilename));
 	QString relname = dir.dirName();
 	QString curpath = QDir::currentPath();
 	dir.cdUp();
@@ -1005,21 +1005,21 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
     if (pictures==-1 && serrno!=ENOENT) {
       delete mpg;
       mpg=0;
-      critical("Failed to open file - dvbcut",errorstring.c_str());
+      critical("Failed to open file - dvbcut",QString::fromStdString(errorstring));
       fileOpenAction->setEnabled(true);
       return;
     }
     if (pictures==-2) {
       delete mpg;
       mpg=0;
-      critical("Invalid index file - dvbcut", errorstring.c_str());
+      critical("Invalid index file - dvbcut", QString::fromStdString(errorstring));
       fileOpenAction->setEnabled(true);
       return;
     }
     if (pictures<=-3) {
       delete mpg;
       mpg=0;
-      critical("Index file mismatch - dvbcut", errorstring.c_str());
+      critical("Index file mismatch - dvbcut", QString::fromStdString(errorstring));
       fileOpenAction->setEnabled(true);
       return;
     }
@@ -1047,11 +1047,11 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
       delete mpg;
       mpg=0;
       critical("Error creating index - dvbcut",
-	       ("Cannot create index for\n"+filename+":\n"+errorstring).c_str());
+	       QString::fromStdString("Cannot create index for\n"+filename+":\n"+errorstring));
       fileOpenAction->setEnabled(true);
       return;
     } else if (!errorstring.empty()) {
-      critical("Error saving index file - dvbcut", errorstring.c_str());
+      critical("Error saving index file - dvbcut", QString::fromStdString(errorstring));
     }
   }
 
@@ -1059,7 +1059,7 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
     delete mpg;
     mpg=0;
     critical("Invalid MPEG file - dvbcut",
-	     ("The chosen file\n"+filename+"\ndoes not contain any video").c_str());
+	     "The chosen file\n"+QString::fromStdString(filename)+"\ndoes not contain any video");
     fileOpenAction->setEnabled(true);
     return;
   }
@@ -1193,7 +1193,7 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
   currentaudiotrack = -1;
 
   for(int a=0;a<mpg->getaudiostreams();++a) {
-  	QAction *trackAction = audiotrackpopup->addAction(mpg->getstreaminfo(audiostream(a)).c_str());
+  	QAction *trackAction = audiotrackpopup->addAction(QString::fromStdString(mpg->getstreaminfo(audiostream(a))));
 
 	audioTrackGroup->addAction(trackAction);
 	trackAction->setData(a);
@@ -2360,7 +2360,7 @@ void dvbcut::on_recentfilespopup_aboutToShow() {
 	recentfilespopup->clear();
 
 	for(unsigned int id = 0; id < settings().recentfiles.size(); id++) {
-		menuitem = QString(settings().recentfiles[id].first.front().c_str());
+		menuitem = QString::fromStdString(settings().recentfiles[id].first.front());
 		if(settings().recentfiles[id].first.size() > 1) {
 			menuitem += " ... (+" + QString::number(settings().recentfiles[id].first.size()-1) + ")";
 		}
