@@ -965,16 +965,14 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
 	   * filename as a relative file: URL. Otherwise, filenames that
 	   * contain ":" will not be handled correctly. --mr
 	   */
-	QDir dir(QString::fromStdString(idxfilename));
-	QString relname = dir.dirName();
+	QFileInfo finfo(QString::fromStdString(idxfilename));
 	QString curpath = QDir::currentPath();
-	dir.cdUp();
-	QDir::setCurrent(dir.path());
+	QDir::setCurrent(finfo.path());
 
 	  QString s=QFileDialog::getSaveFileName(
 		  this,
 		  tr("Choose the name of the index file"),
-		  "file:" + relname,
+		  "file:" + finfo.fileName(),
 		  settings().idxfilter,
 		  NULL,
 		  QFileDialog::DontConfirmOverwrite);
