@@ -143,7 +143,7 @@ dvbcut_settings::load_settings() {
 	    lin_interval = 0;
     endGroup();	// slider
     beginGroup("/lastdir");
-      lastdir = readEntry("/name", ".");
+      lastdir = readEntry("/name", "");
       lastdir_update = readBoolEntry("/update", true);
     endGroup(); // lastdir
     beginGroup("/filter");
@@ -174,7 +174,7 @@ dvbcut_settings::load_settings() {
     lin_interval = readNumEntry("/lin_interval", 3600);
     if (lin_interval < 0)
       lin_interval = 0;
-    lastdir = readEntry("/lastdir", ".");
+    lastdir = readEntry("/lastdir", "");
     lastdir_update = true;
     idxfilter = readEntry("/idxfilter", DVBCUT_DEFAULT_IDXFILTER);
     prjfilter = readEntry("/prjfilter", DVBCUT_DEFAULT_PRJFILTER);
