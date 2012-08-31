@@ -31,6 +31,8 @@
 #include "lavfmuxer.h"
 
 #include <memory>
+#include <cmath>
+#include <cerrno>
 #include <QFileDialog>
 #include <QDir>
 #include <QDomDocument>
