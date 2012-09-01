@@ -1585,8 +1585,8 @@ void dvbcut::on_fileExportAction_triggered(void) {
       stoppic=quick_picture_lookup[num].stoppicture;
       stoppts=quick_picture_lookup[num].stoppts;
       
-      log->printheading(tr("%1. Exporting %2 pictures: %3 .. %4")
-			.arg(num+1).arg(stoppic-startpic).arg(ptsstring(startpts).c_str(),ptsstring(stoppts).c_str()));
+      log->printheading(tr("%1. Exporting %n pictures: %2 .. %3", "", stoppic-startpic)
+			.arg(num+1).arg(ptsstring(startpts).c_str(),ptsstring(stoppts).c_str()));
       mpg->savempg(*mux,startpic,stoppic,savedpic,quick_picture_lookup.back().outpicture,log);
 
       savedpic=quick_picture_lookup[num].outpicture;
@@ -1595,7 +1595,7 @@ void dvbcut::on_fileExportAction_triggered(void) {
 
   mux.reset();
 
-  log->printheading(tr("Saved %1 pictures (%2:%3:%4.%5)").arg(savedpic)
+  log->printheading(tr("Saved %n pictures (%1:%2:%3.%4)", "", savedpic)
 		    .arg(int(savedtime/(3600*90000)), 2, 10, QChar('0'))
 		    .arg(int(savedtime/(60*90000))%60, 2, 10, QChar('0'))
 		    .arg(int(savedtime/90000)%60, 2, 10, QChar('0'))
