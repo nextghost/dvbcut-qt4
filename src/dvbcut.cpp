@@ -2070,39 +2070,39 @@ void dvbcut::on_eventlist_customContextMenuRequested(const QPoint &pos) {
 	EventListModel::EventType evtype;
 
 	if (item) {
-		popup.addAction("Go to")->setData(1);
-		popup.addAction("Delete")->setData(2);
-		submenu = popup.addMenu("Mass delete");
-		submenu->addAction("Delete others")->setData(3);
+		popup.addAction(tr("Go to"))->setData(1);
+		popup.addAction(tr("Delete"))->setData(2);
+		submenu = popup.addMenu(tr("Mass delete"));
+		submenu->addAction(tr("Delete others"))->setData(3);
 	} else {
 		submenu = &popup;
 	}
 
-	submenu->addAction("Delete all")->setData(4);
-	submenu->addAction("Delete all start/stops")->setData(5);
-	submenu->addAction("Delete all chapters")->setData(6);
-	submenu->addAction("Delete all bookmarks")->setData(7);
+	submenu->addAction(tr("Delete all"))->setData(4);
+	submenu->addAction(tr("Delete all start/stops"))->setData(5);
+	submenu->addAction(tr("Delete all chapters"))->setData(6);
+	submenu->addAction(tr("Delete all bookmarks"))->setData(7);
 
 	if (item) {
-		submenu = popup.addMenu("Convert");
+		submenu = popup.addMenu(tr("Convert"));
 
 		if (item->evtype != EventListModel::Start) {
-			submenu->addAction("Convert to start marker")->setData(8);
+			submenu->addAction(tr("Convert to start marker"))->setData(8);
 		}
 
 		if (item->evtype != EventListModel::Stop) {
-			submenu->addAction("Convert to stop marker")->setData(9);
+			submenu->addAction(tr("Convert to stop marker"))->setData(9);
 		}
 
 		if (item->evtype != EventListModel::Chapter) {
-			submenu->addAction("Convert to chapter marker")->setData(10);
+			submenu->addAction(tr("Convert to chapter marker"))->setData(10);
 		}
 
 		if (item->evtype != EventListModel::Bookmark) {
-			submenu->addAction("Convert to bookmark")->setData(11);
+			submenu->addAction(tr("Convert to bookmark"))->setData(11);
 		}
 
-		popup.addAction("Display difference from this picture")->setData(12);
+		popup.addAction(tr("Display difference from this picture"))->setData(12);
 	}
 
 	// Shift by 2 pixels to avoid selecting the first action by accident

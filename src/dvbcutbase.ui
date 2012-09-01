@@ -844,21 +844,6 @@
     <string>F1</string>
    </property>
   </action>
-  <action name="actionFoo">
-   <property name="text">
-    <string>foo</string>
-   </property>
-  </action>
-  <action name="actionFoo_2">
-   <property name="text">
-    <string>foo</string>
-   </property>
-  </action>
-  <action name="actionFoo_3">
-   <property name="text">
-    <string>foo</string>
-   </property>
-  </action>
   <action name="editConvertStart">
    <property name="text">
     <string>START / STOP</string>
