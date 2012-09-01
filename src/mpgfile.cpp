@@ -94,7 +94,7 @@ mpgfile::open(inbuffer &b, std::string *errormessage) {
 
   if (b.providedata(64 << 10) < (64 << 10)) {
     if (errormessage)
-      *errormessage = "File too short";
+      *errormessage = QCoreApplication::translate("mpgfile", "File too short").toStdString();
     return 0;
   }
 
@@ -107,7 +107,7 @@ mpgfile::open(inbuffer &b, std::string *errormessage) {
     return new psfile(b, initialoffset);
 
   if (errormessage)
-    *errormessage = "Unknown file type";
+    *errormessage = QCoreApplication::translate("mpgfile", "Unknown file type").toStdString();
   return 0;
 }
 
