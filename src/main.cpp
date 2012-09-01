@@ -33,6 +33,7 @@
 #endif // HAVE_LIB_AO
 
 #include <qapplication.h>
+#include <QTranslator>
 extern "C" {
 #include <libavformat/avformat.h>
 }
@@ -200,6 +201,11 @@ main(int argc, char *argv[]) {
    */
   QApplication a(argc, argv);
   QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
+	QString locale = QLocale::system().name();
+	QTranslator translator;
+
+	translator.load("dvbcut_" + locale);
+	a.installTranslator(&translator);
 
 #ifdef HAVE_LIB_AO
   ao_initialize();

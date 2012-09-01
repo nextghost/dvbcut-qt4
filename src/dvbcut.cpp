@@ -41,7 +41,6 @@
 #include <QPixmap>
 #include <QRegExpValidator>
 #include <QWheelEvent>
-#include <QTextBrowser>
 
 bool dvbcut::cache_friendly = true;
 
@@ -76,9 +75,7 @@ public:
 	}
 };
 
-class helpDialog : public QDialog {
-public:
-  helpDialog(QWidget *parent, QString file)
+helpDialog::helpDialog(QWidget *parent, QString file)
   : QDialog(parent)
   {
     vbox = new QVBoxLayout(this);
@@ -106,14 +103,9 @@ public:
     setWindowTitle(tr("dvbcut help"));
     show();
   }
-  virtual ~helpDialog() {
+
+helpDialog::~helpDialog() {
   }
-private:
-  QVBoxLayout *vbox;
-  QHBoxLayout *hbox;
-  QTextBrowser *viewer;
-  QPushButton *prev, *next, *home, *close;
-};
 
 class mplayererrorbase : public QDialog, public Ui::mplayererrorbase {
 public:
@@ -463,7 +455,7 @@ void dvbcut::snapshotSave(std::vector<int> piclist, int range, int samples) {
     this,
     tr("Choose the name of the picture file"),
     picfilen,
-    "Images (*."+ext+")");
+    tr("Images (*.%1)").arg(ext));
 
   if (s.isEmpty())
     return;
@@ -1396,10 +1388,10 @@ void dvbcut::on_fileExportAction_triggered(void) {
   }
 
   std::auto_ptr<exportdialog> expd(new exportdialog(QString::fromStdString(expfilen),this));
-  expd->muxercombo->addItem("MPEG program stream/DVD (DVBCUT multiplexer)");
-  expd->muxercombo->addItem("MPEG program stream (DVBCUT multiplexer)");
-  expd->muxercombo->addItem("MPEG program stream/DVD (libavformat)");
-  expd->muxercombo->addItem("MPEG transport stream (libavformat)");
+  expd->muxercombo->addItem(tr("MPEG program stream/DVD (DVBCUT multiplexer)"));
+  expd->muxercombo->addItem(tr("MPEG program stream (DVBCUT multiplexer)"));
+  expd->muxercombo->addItem(tr("MPEG program stream/DVD (libavformat)"));
+  expd->muxercombo->addItem(tr("MPEG transport stream (libavformat)"));
 #ifndef __WIN32__
   // add possible user configured pipe commands 
   int pipe_items_start=expd->muxercombo->count();

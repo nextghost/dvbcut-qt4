@@ -35,8 +35,8 @@ void exportdialog::on_filenamebrowsebutton_clicked() {
                         this,
 			tr("Export video..."),
                         filenameline->text(),
-                        "MPEG program streams (*.mpg)"
-                        ";;All files (*)"
+                        tr("MPEG program streams (*.mpg)"
+                        ";;All files (*)")
                         ));
 
   if (!newfilename.isNull())

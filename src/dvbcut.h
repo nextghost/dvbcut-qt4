@@ -24,6 +24,8 @@
 #include <string>
 #include <list>
 #include <QProcess>
+#include <QTextBrowser>
+#include <QDialog>
 
 #include "ui_dvbcutbase.h"
 #include "version.h"
@@ -181,6 +183,21 @@ public slots:
 	void on_audiotrackpopup_triggered(QAction *action);
 	void on_recentfilespopup_triggered(QAction *action);
 	void on_recentfilespopup_aboutToShow();
+};
+
+class helpDialog : public QDialog {
+private:
+	Q_OBJECT
+
+public:
+  helpDialog(QWidget *parent, QString file);
+  virtual ~helpDialog();
+
+private:
+  QVBoxLayout *vbox;
+  QHBoxLayout *hbox;
+  QTextBrowser *viewer;
+  QPushButton *prev, *next, *home, *close;
 };
 
 #endif
