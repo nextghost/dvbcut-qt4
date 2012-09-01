@@ -54,12 +54,20 @@ logoutput::print(const char *fmt, ...) {
   va_end(ap);
 }
 
+void logoutput::print(const QString &str) {
+	print((const char*)str.toLocal8Bit());
+}
+
 void
 logoutput::printheading(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   vprintmsg(fmt, ap, "=== ", " ===");
   va_end(ap);
+}
+
+void logoutput::printheading(const QString &str) {
+	printheading((const char*)str.toLocal8Bit());
 }
 
 void
@@ -70,6 +78,10 @@ logoutput::printinfo(const char *fmt, ...) {
   va_end(ap);
 }
 
+void logoutput::printinfo(const QString &str) {
+	printinfo((const char*)str.toLocal8Bit());
+}
+
 void
 logoutput::printerror(const char *fmt, ...) {
   va_list ap;
@@ -78,10 +90,18 @@ logoutput::printerror(const char *fmt, ...) {
   va_end(ap);
 }
 
+void logoutput::printerror(const QString &str) {
+	printerror((const char*)str.toLocal8Bit());
+}
+
 void
 logoutput::printwarning(const char *fmt, ...) {
   va_list ap;
   va_start(ap,fmt);
   vprintmsg(fmt, ap, "WARNING: ", 0);
   va_end(ap);
+}
+
+void logoutput::printwarning(const QString &str) {
+	printwarning((const char*)str.toLocal8Bit());
 }

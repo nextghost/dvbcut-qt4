@@ -27,6 +27,7 @@
 
 #include <list>
 #include <utility>
+#include <QCoreApplication>
 
 #include "port.h"
 #include "mpgfile.h"
@@ -437,8 +438,9 @@ void mpgfile::savempg(muxer &mux, int start, int stop, int savedpics, int savepi
     dvbcut_off_t bytes = stop_pos - start_pos;
     pts_t delta_pts = (pts_t)(stop - start) * framerate / 300;
     double mux_rate = (double)bytes * 9e4 / (double)delta_pts;
-    if (log)
-      log->printinfo("Estimated mux rate: %.2f MB/s", mux_rate * 1e-6);
+    if (log) {
+      log->printinfo(QCoreApplication::translate("mpgfile", "Estimated mux rate: %1 MB/s").arg(mux_rate * 1e-6, 0, 'f', 2));
+    }
   }
 
   while (seekpic>0 && idx[seekpic].getpts()>=videostartpts-180000)
@@ -591,10 +593,11 @@ void mpgfile::savempg(muxer &mux, int start, int stop, int savedpics, int savepi
           if (!mux.putpacket(VIDEOSTREAM,vsd->getdata(),picsize,vidpts,viddts,
                              idx[streampic].isiframe() ? MUXER_FLAG_KEY:0  ))
             {
-            if (log)
-              log->printwarning("putpacket(streampic=%d) returned false",streampic);
-            else
+            if (log) {
+              log->printwarning(QCoreApplication::translate("mpgfile", "putpacket(streampic=%1) returned false").arg(streampic));
+            } else {
               fprintf(stderr,"WARN: putpacket(streampic=%d) returned false\n",streampic);
+	    }
             }
         }
 
@@ -705,12 +708,25 @@ void mpgfile::savempg(muxer &mux, int start, int stop, int savedpics, int savepi
         float starts=float(audiostartpts[a]-videostartpts)/90.;
         float stops=float(audiostoppts[a]-videostoppts)/90.;
         float shift=float(audiooffset[a]-videooffset)/90.;
-        log->printinfo("Audio channel %d: starts %.3f milliseconds %s video",
-          a+1, fabsf(starts-shift), (starts>=shift) ? "after":"before");
-        log->printinfo("Audio channel %d: stops %.3f milliseconds %s video",
-          a+1, fabsf(stops-shift), (stops>=shift) ? "after":"before");
-	log->printinfo("Audio channel %d: delayed %.3f milliseconds",
-          a+1, shift);
+
+	if (starts >= shift) {
+	        log->printinfo(QCoreApplication::translate("mpgfile", "Audio channel %1: starts %2 milliseconds after video")
+        	  .arg(a+1).arg(fabsf(starts-shift), 0, 'f', 3));
+	} else {
+	        log->printinfo(QCoreApplication::translate("mpgfile", "Audio channel %1: starts %2 milliseconds before video")
+        	  .arg(a+1).arg(fabsf(starts-shift), 0, 'f', 3));
+	}
+
+	if (stops >= shift) {
+	        log->printinfo(QCoreApplication::translate("mpgfile", "Audio channel %1: stops %2 milliseconds after video")
+	          .arg(a+1).arg(fabsf(stops-shift), 0, 'f', 3));
+	} else {
+	        log->printinfo(QCoreApplication::translate("mpgfile", "Audio channel %1: stops %2 milliseconds before video")
+	          .arg(a+1).arg(fabsf(stops-shift), 0, 'f', 3));
+	}
+
+	log->printinfo(QCoreApplication::translate("mpgfile", "Audio channel %1: delayed %2 milliseconds")
+          .arg(a+1).arg(shift, 0, 'f', 3));
 	log->print("");
       }
 
@@ -721,8 +737,9 @@ void mpgfile::savempg(muxer &mux, int start, int stop, int savedpics, int savepi
 
 void mpgfile::recodevideo(muxer &mux, int start, int stop, pts_t offset,int savedpics,int savepics, logoutput *log)
 {
-  if (log)
-    log->printinfo("Recoding %d pictures", stop-start);
+  if (log) {
+    log->printinfo(QCoreApplication::translate("mpgfile", "Recoding %1 pictures").arg(stop-start));
+  }
 
   std::list<avframe*> framelist;
   decodegop(start,stop,framelist);
@@ -734,8 +751,9 @@ void mpgfile::recodevideo(muxer &mux, int start, int stop, pts_t offset,int save
 
   if (int rv=avcodec_open(avcc, s[VIDEOSTREAM].enc))
   {
-    if (log)
-      log->printerror("avcodec_open(mpeg2video_encoder) returned %d",rv);
+    if (log) {
+      log->printerror(QCoreApplication::translate("mpgfile", "avcodec_open(mpeg2video_encoder) returned %1").arg(rv));
+    }
     return ;
   }
 

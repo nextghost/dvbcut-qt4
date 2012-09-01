@@ -26,15 +26,20 @@
 #include "ui_progresswindowbase.h"
 #include "logoutput.h"
 
-class progresswindow: public QDialog, public Ui::progresswindowbase, public logoutput
-  {
+class progresswindow: public QDialog, public Ui::progresswindowbase, public logoutput {
+private:
   Q_OBJECT
+
+	QTextCharFormat _cfHeading, _cfInfo, _cfError, _cfWarning;
+
 protected:
   bool cancelwasclicked;
   bool waitingforclose;
 
   static QString quotetext(const char* text);
   void closeEvent(QCloseEvent *e);
+  virtual void print(const QString &str, const QTextCharFormat &format);
+
 public:
   progresswindow(QWidget *parent = 0);
   virtual bool cancelled()
@@ -43,10 +48,15 @@ public:
     }
   virtual void finish();
   virtual void print(const char *fmt, ...);
+  virtual void print(const QString &str);
   virtual void printheading(const char *fmt, ...);
+  virtual void printheading(const QString &str);
   virtual void printinfo(const char *fmt, ...);
+  virtual void printinfo(const QString &str);
   virtual void printerror(const char *fmt, ...);
+  virtual void printerror(const QString &str);
   virtual void printwarning(const char *fmt, ...);
+  virtual void printwarning(const QString &str);
 
 public slots:
   virtual void setprogress(int permille);

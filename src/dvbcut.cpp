@@ -1564,7 +1564,7 @@ void dvbcut::on_fileExportAction_triggered(void) {
       while (waitpid(child_pid, &wstatus, 0)==-1 && errno==EINTR);
     }
 #endif
-    log->printerror("Unable to set up muxer!");
+    log->printerror(tr("Unable to set up muxer!"));
     if (nogui)
       delete log;
     else {
@@ -1586,8 +1586,8 @@ void dvbcut::on_fileExportAction_triggered(void) {
       stoppic=quick_picture_lookup[num].stoppicture;
       stoppts=quick_picture_lookup[num].stoppts;
       
-      log->printheading("%d. Exporting %d pictures: %s .. %s",
-			num+1,stoppic-startpic,ptsstring(startpts).c_str(),ptsstring(stoppts).c_str());
+      log->printheading(tr("%1. Exporting %2 pictures: %3 .. %4")
+			.arg(num+1).arg(stoppic-startpic).arg(ptsstring(startpts).c_str(),ptsstring(stoppts).c_str()));
       mpg->savempg(*mux,startpic,stoppic,savedpic,quick_picture_lookup.back().outpicture,log);
 
       savedpic=quick_picture_lookup[num].outpicture;
@@ -1596,11 +1596,11 @@ void dvbcut::on_fileExportAction_triggered(void) {
 
   mux.reset();
 
-  log->printheading("Saved %d pictures (%02d:%02d:%02d.%03d)",savedpic,
-		    int(savedtime/(3600*90000)),
-		    int(savedtime/(60*90000))%60,
-		    int(savedtime/90000)%60,
-		    int(savedtime/90)%1000	);
+  log->printheading(tr("Saved %1 pictures (%2:%3:%4.%5)").arg(savedpic)
+		    .arg(int(savedtime/(3600*90000)), 2, 10, QChar('0'))
+		    .arg(int(savedtime/(60*90000))%60, 2, 10, QChar('0'))
+		    .arg(int(savedtime/90000)%60, 2, 10, QChar('0'))
+		    .arg(int(savedtime/90)%1000, 2, 10, QChar('0')));
 
 #ifndef __WIN32__
   if (child_pid > 0) {
@@ -1622,18 +1622,18 @@ void dvbcut::on_fileExportAction_triggered(void) {
     std::string which="which "+expcmd.substr(0,pos)+" >/dev/null";
 
     log->print("");
-    log->printheading("Performing post processing");
+    log->printheading(tr("Performing post processing"));
     int irc = system(which.c_str());
 
     if(irc!=0) { 
       critical("Command not found - dvbcut","Problems with post processing command:\n"+QString::fromStdString(expcmd.substr(0,pos)));
-      log->print("Command not found!");
+      log->print(tr("Command not found!"));
     } else {      
       int irc = system(expcmd.c_str());
       if(irc!=0) { 
         critical("Post processing error - dvbcut","Post processing command:\n"+
                  QString::fromStdString(expcmd)+"\n returned non-zero exit code: " +QString::number(irc));
-        log->print("Command reported some problems... please check!");
+        log->print(tr("Command reported some problems... please check!"));
       } 
       //else      
       //  log->print("Everything seems to be OK...");
@@ -1643,7 +1643,7 @@ void dvbcut::on_fileExportAction_triggered(void) {
 
   // print plain list of chapter marks
   log->print("");
-  log->printheading("Chapter list");
+  log->printheading(tr("Chapter list"));
   log->print(chaptercolumn.c_str());
 
   // simple dvdauthor xml file with chapter marks
@@ -1654,7 +1654,7 @@ void dvbcut::on_fileExportAction_triggered(void) {
     filename=expfilen;
   destname=filename.substr(0,filename.rfind("."));
   log->print("");
-  log->printheading("Simple XML-file for dvdauthor with chapter marks");
+  log->printheading(tr("Simple XML-file for dvdauthor with chapter marks"));
   log->print("<dvdauthor dest=\"%s\">",destname.c_str());
   log->print("  <vmgm />");
   log->print("  <titleset>");

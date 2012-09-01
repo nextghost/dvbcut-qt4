@@ -47,6 +47,15 @@ progresswindow::progresswindow(QWidget *parent)
 	pal.setColor(QPalette::Mid, QColor(223, 0, 0));
 	cancelbutton->setPalette(pal);
 
+	// Set up log window styles
+	_cfHeading.setUnderlineStyle(QTextCharFormat::SingleUnderline);
+	_cfHeading.setFontWeight(700);
+	// leave defaults in _cfInfo
+	_cfError.setUnderlineStyle(QTextCharFormat::SingleUnderline);
+	_cfError.setFontWeight(700);
+	_cfError.setForeground(Qt::red);
+	_cfWarning.setForeground(Qt::red);
+
 	setModal(true);
   show();
   qApp->processEvents();
@@ -59,6 +68,13 @@ void progresswindow::closeEvent(QCloseEvent *e)
   else
     e->ignore();
   }
+
+void progresswindow::print(const QString &str, const QTextCharFormat &format) {
+	logbrowser->setCurrentCharFormat(format);
+	logbrowser->insertPlainText(str + "\n");
+	logbrowser->ensureCursorVisible();
+	qApp->processEvents();
+}
 
 void progresswindow::finish()
   {
@@ -94,31 +110,30 @@ void progresswindow::print(const char *fmt, ...)
   if (vasprintf(&text,fmt,ap)<0 || (text==0))
     return;
 
-	logbrowser->setCurrentCharFormat(QTextCharFormat());
-	logbrowser->insertPlainText(QString(text) + "\n");
-	logbrowser->ensureCursorVisible();
+	print(QString(text));
   free(text);
-  qApp->processEvents();
   }
+
+void progresswindow::print(const QString &str) {
+	print(str, _cfInfo);
+}
 
 void progresswindow::printheading(const char *fmt, ...)
   {
   va_list ap;
   va_start(ap,fmt);
   char *text=0;
-	QTextCharFormat cf;
 
   if (vasprintf(&text,fmt,ap)<0 || (text==0))
     return;
 
-	cf.setUnderlineStyle(QTextCharFormat::SingleUnderline);
-	cf.setFontWeight(700);
-	logbrowser->setCurrentCharFormat(cf);
-  logbrowser->insertPlainText(QString(text) + "\n");
-	logbrowser->ensureCursorVisible();
+	printheading(QString(text));
   free(text);
-  qApp->processEvents();
   }
+
+void progresswindow::printheading(const QString &str) {
+	print(str, _cfHeading);
+}
 
 void progresswindow::printinfo(const char *fmt, ...)
   {
@@ -129,32 +144,30 @@ void progresswindow::printinfo(const char *fmt, ...)
   if (vasprintf(&text,fmt,ap)<0 || (text==0))
     return;
 
-	logbrowser->setCurrentCharFormat(QTextCharFormat());
-  logbrowser->insertPlainText(QString(text) + "\n");
-	logbrowser->ensureCursorVisible();
+	printinfo(QString(text));
   free(text);
-  qApp->processEvents();
   }
+
+void progresswindow::printinfo(const QString &str) {
+	print(str, _cfInfo);
+}
 
 void progresswindow::printerror(const char *fmt, ...)
   {
   va_list ap;
   va_start(ap,fmt);
   char *text=0;
-	QTextCharFormat cf;
 
   if (vasprintf(&text,fmt,ap)<0 || (text==0))
     return;
 
-	cf.setUnderlineStyle(QTextCharFormat::SingleUnderline);
-	cf.setFontWeight(700);
-	logbrowser->setCurrentCharFormat(cf);
-	logbrowser->setTextColor(Qt::red);
-  logbrowser->insertPlainText(QString(text) + "\n");
-	logbrowser->ensureCursorVisible();
+	printerror(QString(text));
   free(text);
-  qApp->processEvents();
   }
+
+void progresswindow::printerror(const QString &str) {
+	print(str, _cfError);
+}
 
 void progresswindow::printwarning(const char *fmt, ...)
   {
@@ -164,13 +177,13 @@ void progresswindow::printwarning(const char *fmt, ...)
   if (vasprintf(&text,fmt,ap)<0 || (text==0))
     return;
 
-	logbrowser->setCurrentCharFormat(QTextCharFormat());
-	logbrowser->setTextColor(Qt::red);
-  logbrowser->insertPlainText(QString(text) + "\n");
-	logbrowser->ensureCursorVisible();
+	printwarning(QString(text));
   free(text);
-  qApp->processEvents();
   }
+
+void progresswindow::printwarning(const QString &str) {
+	print(str, _cfWarning);
+}
 
 void progresswindow::on_cancelbutton_clicked()
   {
