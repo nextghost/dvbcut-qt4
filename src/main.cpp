@@ -45,8 +45,6 @@ extern "C" {
 #include "index.h"
 #include "settings.h"
 
-#include "gettext.h"
-
 #include "version.h"
 
 static char *argv0;
@@ -91,7 +89,6 @@ main(int argc, char *argv[]) {
   int i;
 
   setlocale(LC_ALL, "");
-  textdomain("dvbcut");
   /*
    * process arguments
    */
