@@ -439,6 +439,7 @@ void mpgfile::savempg(muxer &mux, int start, int stop, int savedpics, int savepi
     pts_t delta_pts = (pts_t)(stop - start) * framerate / 300;
     double mux_rate = (double)bytes * 9e4 / (double)delta_pts;
     if (log) {
+      //: Placeholder will be replaced with floating point number
       log->printinfo(QCoreApplication::translate("mpgfile", "Estimated mux rate: %1 MB/s").arg(mux_rate * 1e-6, 0, 'f', 2));
     }
   }
@@ -594,6 +595,7 @@ void mpgfile::savempg(muxer &mux, int start, int stop, int savedpics, int savepi
                              idx[streampic].isiframe() ? MUXER_FLAG_KEY:0  ))
             {
             if (log) {
+	      //: Placeholder will be replaced with streampic number
               log->printwarning(QCoreApplication::translate("mpgfile", "putpacket(streampic=%1) returned false").arg(streampic));
             } else {
               fprintf(stderr,"WARN: putpacket(streampic=%d) returned false\n",streampic);
@@ -752,6 +754,7 @@ void mpgfile::recodevideo(muxer &mux, int start, int stop, pts_t offset,int save
   if (int rv=avcodec_open(avcc, s[VIDEOSTREAM].enc))
   {
     if (log) {
+      //: Placeholder will be replaced with return value (integer)
       log->printerror(QCoreApplication::translate("mpgfile", "avcodec_open(mpeg2video_encoder) returned %1").arg(rv));
     }
     return ;

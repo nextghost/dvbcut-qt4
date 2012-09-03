@@ -369,6 +369,7 @@ void dvbcut::update_quick_picture_lookup_table() {
 
 int dvbcut::question(const QString & caption, const QString & text) {
 	if (nogui) {
+		//: Question during batch processing - print the prompt and tell the user that you assume the answer is No.
 		fprintf(stderr, "%s", (const char*)tr("%1\n%2\n(assuming No)\n").arg(caption, text).toLocal8Bit());
 		return QMessageBox::No;
 	}
@@ -378,6 +379,7 @@ int dvbcut::question(const QString & caption, const QString & text) {
 
 int dvbcut::critical(const QString & caption, const QString & text) {
 	if (nogui) {
+		//: Error during batch processing - print text and tell the user you're aborting the batch
 		fprintf(stderr, "%s", (const char*)tr("%1\n%2\n(aborting)\n").arg(caption, text).toLocal8Bit());
 		return QMessageBox::Abort;
 	}
@@ -455,6 +457,7 @@ void dvbcut::snapshotSave(std::vector<int> piclist, int range, int samples) {
     this,
     tr("Choose the name of the picture file"),
     picfilen,
+    //: Placeholder will be replaced with file extension
     tr("Images (*.%1)").arg(ext));
 
   if (s.isEmpty())
@@ -462,6 +465,7 @@ void dvbcut::snapshotSave(std::vector<int> piclist, int range, int samples) {
 
   if (QFileInfo(s).exists() && question(
     tr("File exists - dvbcut"),
+    //: Placeholder will be replaced with filename
     tr("%1\nalready exists. Overwrite?").arg(s)) !=
     QMessageBox::Yes)
     return;
@@ -852,6 +856,7 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
           QDomElement docelem = domdoc.documentElement();
           if (docelem.tagName() != "dvbcut") {
             critical(tr("Failed to read project file - dvbcut"),
+	      //: Placeholder will be replaced with filename
 	      tr("%1:\nNot a valid dvbcut project file").arg(QString::fromStdString(filename)));
             fileOpenAction->setEnabled(true);
             return;
@@ -909,6 +914,7 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
 	  // sanity check
 	  if (filenames.empty()) {
 	    critical(tr("Failed to read project file - dvbcut"),
+	      //: Placeholder will be replaced with project filename
 	      tr("%1:\nNo MPEG filename given in project file").arg(QString::fromStdString(filename)));
 	    fileOpenAction->setEnabled(true);
 	    return;
@@ -1011,6 +1017,7 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
     if (pictures<=-3) {
       delete mpg;
       mpg=0;
+      //: The index file belongs to another MPEG file
       critical(tr("Index file mismatch - dvbcut"), QString::fromStdString(errorstring));
       fileOpenAction->setEnabled(true);
       return;
@@ -1039,6 +1046,7 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
       delete mpg;
       mpg=0;
       critical(tr("Error creating index - dvbcut"),
+	       //: %1 will be replaced with filename, %2 with error description
 	       tr("Cannot create index for\n%1:\n%2").arg(QString::fromStdString(filename), QString::fromStdString(errorstring)));
       fileOpenAction->setEnabled(true);
       return;
@@ -1051,6 +1059,7 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
     delete mpg;
     mpg=0;
     critical(tr("Invalid MPEG file - dvbcut"),
+	     //: Placeholder will be replaced with filename
 	     tr("The chosen file\n%1\ndoes not contain any video").arg(QString::fromStdString(filename)));
     fileOpenAction->setEnabled(true);
     return;
@@ -1255,6 +1264,7 @@ void dvbcut::on_fileSaveAction_triggered(void) {
   QFile outfile(QString::fromStdString(prjfilen));
   if (!outfile.open(QIODevice::WriteOnly)) {
     critical(tr("Failed to write project file - dvbcut"),
+      //: Placeholder will be replaced with filename
       tr("%1:\nCould not open file").arg(QString::fromStdString(prjfilen)));
     return;
   }
@@ -1483,7 +1493,9 @@ void dvbcut::on_fileExportAction_triggered(void) {
     std::string which="which "+expcmd.substr(pos,end-pos)+" >/dev/null";
     int irc = system(which.c_str());
     if(irc!=0) { 
-      critical(tr("Command not found - dvbcut"), tr("Problems with piped output to:\n%1").arg(QString::fromStdString(expcmd.substr(pos,end-pos))));
+      critical(tr("Command not found - dvbcut"),
+        //: Placeholder will be replaced with pipe command
+        tr("Problems with piped output to:\n%1").arg(QString::fromStdString(expcmd.substr(pos,end-pos))));
       return; 
     }       
 
@@ -1585,6 +1597,7 @@ void dvbcut::on_fileExportAction_triggered(void) {
       stoppic=quick_picture_lookup[num].stoppicture;
       stoppts=quick_picture_lookup[num].stoppts;
       
+      //: Example: 1. Exporting 600 pictures: 00:05:45.240/00 .. 00:06:09.240/00
       log->printheading(tr("%1. Exporting %n pictures: %2 .. %3", "", stoppic-startpic)
 			.arg(num+1).arg(ptsstring(startpts).c_str(),ptsstring(stoppts).c_str()));
       mpg->savempg(*mux,startpic,stoppic,savedpic,quick_picture_lookup.back().outpicture,log);
@@ -1595,6 +1608,7 @@ void dvbcut::on_fileExportAction_triggered(void) {
 
   mux.reset();
 
+  //: Example: Saved 3627 pictures (00:02:25.80)
   log->printheading(tr("Saved %n pictures (%1:%2:%3.%4)", "", savedpic)
 		    .arg(int(savedtime/(3600*90000)), 2, 10, QChar('0'))
 		    .arg(int(savedtime/(60*90000))%60, 2, 10, QChar('0'))
@@ -1625,12 +1639,15 @@ void dvbcut::on_fileExportAction_triggered(void) {
     int irc = system(which.c_str());
 
     if(irc!=0) { 
-      critical(tr("Command not found - dvbcut"), tr("Problems with post processing command:\n%1").arg(QString::fromStdString(expcmd.substr(0,pos))));
+      critical(tr("Command not found - dvbcut"),
+        //: Placeholder will be replaced with pipe command
+        tr("Problems with post processing command:\n%1").arg(QString::fromStdString(expcmd.substr(0,pos))));
       log->print(tr("Command not found!"));
     } else {      
       int irc = system(expcmd.c_str());
       if(irc!=0) { 
         critical(tr("Post processing error - dvbcut"),
+		//: %1 will be replaced with exit code, %2 with pipe command
 		tr("Post processing command:\n%2\n returned non-zero exit code: %1").arg(irc).arg(QString::fromStdString(expcmd)));
         log->print(tr("Command reported some problems... please check!"));
       } 
@@ -2072,6 +2089,7 @@ void dvbcut::on_eventlist_customContextMenuRequested(const QPoint &pos) {
 	if (item) {
 		popup.addAction(tr("Go to"))->setData(1);
 		popup.addAction(tr("Delete"))->setData(2);
+		//: Submenu containing mass delete actions
 		submenu = popup.addMenu(tr("Mass delete"));
 		submenu->addAction(tr("Delete others"))->setData(3);
 	} else {
@@ -2084,6 +2102,7 @@ void dvbcut::on_eventlist_customContextMenuRequested(const QPoint &pos) {
 	submenu->addAction(tr("Delete all bookmarks"))->setData(7);
 
 	if (item) {
+		//: Submenu containing convert actions
 		submenu = popup.addMenu(tr("Convert"));
 
 		if (item->evtype != EventListModel::Start) {
