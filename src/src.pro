@@ -3,7 +3,7 @@ SOURCES = avframe.cpp buffer.cpp differenceimageprovider.cpp dvbcut.cpp eventlis
 HEADERS = avframe.h buffer.h busyindicator.h defines.h differenceimageprovider.h dvbcut.h eventlistmodel.h exception.h exportdialog.h imageprovider.h index.h lavfmuxer.h logoutput.h mpegmuxer.h mpgfile.h muxer.h playaudio.h port.h progressstatusbar.h progresswindow.h psfile.h pts.h settings.h stream.h streamdata.h streamhandle.h tsfile.h types.h ../ffmpeg.src/libavformat/avformat.h
 FORMS = dvbcutbase.ui exportdialogbase.ui mplayererrorbase.ui progresswindowbase.ui
 RESOURCES = dvbcutbase.qrc
-TRANSLATIONS = dvbcut_cs.ts dvbcut_de.ts dvbcut_en.ts
+TRANSLATIONS = dvbcut_cs.ts dvbcut_de.ts dvbcut.ts
 CONFIG += link_pkgconfig
 QMAKE_CXXFLAGS += -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -D_FILE_OFFSET_BITS=64
 DESTDIR = ../bin
