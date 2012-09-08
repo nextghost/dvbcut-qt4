@@ -40,6 +40,7 @@ extern "C" {
 #include <qimage.h>
 #include <qsettings.h>
 #include <qtextcodec.h>
+#include <QLibraryInfo>
 #include "dvbcut.h"
 #include "mpgfile.h"
 #include "index.h"
@@ -199,9 +200,11 @@ main(int argc, char *argv[]) {
   QApplication a(argc, argv);
   QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 	QString locale = QLocale::system().name();
-	QTranslator translator;
+	QTranslator translator, qtranslator;
 
+	qtranslator.load("qt_" + locale, QLibraryInfo::location(QLibraryInfo::TranslationsPath));
 	translator.load("dvbcut_" + locale);
+	a.installTranslator(&qtranslator);
 	a.installTranslator(&translator);
 
 #ifdef HAVE_LIB_AO
