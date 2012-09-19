@@ -7,7 +7,7 @@ unix {
 	}
 
 	isEmpty(MANPATH) {
-		MANPATH = $$PREFIX/man
+		MANPATH = $$PREFIX/share/man
 	}
 
 	isEmpty(DATADIR) {
