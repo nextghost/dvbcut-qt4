@@ -1,14 +1,12 @@
-DVBCUT INSTALL -- last edited 2009-01-24
+DVBCUT INSTALL -- last edited 2012-09-19
 
 In order to compile dvbcut, you need to have the following libraries
 installed:
 
-* Qt, version 3
+* Qt, version 4
+* ffmpeg (optional, for video encoding and decoding)
 * libao (optional, for sound output)
 * libmad and liba52 for MP2 and AC3 decoding, respectively.
-
-On a Debian system, the following packages should do the job: 
-libqt3-mt-dev qt3-dev-tools scons libao-dev libmad0-dev liba52-0.7.4-dev
 
 If you have MPlayer installed on your machine (and it is accessible as
 "mplayer"), you can play the videos inside DVBCUT.
@@ -16,10 +14,6 @@ If you have MPlayer installed on your machine (and it is accessible as
 How to compile DVBCUT:
 
 * Unpack the dvbcut source archive and enter the dvbcut directory.
-* Type `./configure && make'. If everything works well, you will find
+* Type `qmake && make'. If everything works well, you will find
   the DVBCUT executable in the bin subdirectory. To install it, run
   `make install' (as root).
-* Note to SVN users:
-  You need to run `autoconf' in order to generate the `configure'
-  script. If you're going to modify the sources, it may also be a
-  good idea to run `make dep' after configuring dvbcut.

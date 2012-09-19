@@ -10,7 +10,9 @@ unix {
 		MANPATH = $$PREFIX/man
 	}
 
-	DATADIR = "$$PREFIX/share/dvbcut"
+	isEmpty(DATADIR) {
+		DATADIR = "$$PREFIX/share/dvbcut"
+	}
 
 	system(echo "PREFIX = \\'$$PREFIX\\'" >.qmake.cache)
 	system(echo "DATADIR = \\'$$DATADIR\\'" >>.qmake.cache)
