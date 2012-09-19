@@ -80,7 +80,7 @@ l10n.variable_out = l10ninst.files
 QMAKE_EXTRA_COMPILERS += l10n
 
 unix {
-	QMAKE_CXXFLAGS += -DDVBCUT_DATADIR=\"$$DATADIR\"
+	QMAKE_CXXFLAGS += -DDVBCUT_DATADIR=\"\\\"$$DATADIR\\\"\"
 
 	DESKTOP_IN = ../dvbcut.desktop.in
 	desktop.commands = sed -e \'s,@prefix@,$$PREFIX,\' ${QMAKE_FILE_IN} >${QMAKE_FILE_OUT}

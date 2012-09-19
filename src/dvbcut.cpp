@@ -605,16 +605,22 @@ void dvbcut::on_helpAboutAction_triggered(void) {
 }
 
 void dvbcut::on_helpContentAction_triggered(void) {
+	QString helpFile;
+
+#ifdef DVBCUT_DATADIR
+	helpFile = DVBCUT_DATADIR "/help/dvbcut_en.html";
+#else	// ifdef DVBCUT_DATADIR
   QDir appDir(qApp->applicationDirPath());
   // first search in the directory containing dvbcut
-  QString helpFile = appDir.absoluteFilePath("dvbcut_en.html");
+  helpFile = appDir.absoluteFilePath("dvbcut_en.html");
 #ifndef __WIN32__
   // Unix/Linux: search in the associated share subdirectory
   if (!QFile::exists(helpFile)) {
 	appDir.cdUp();
     helpFile = appDir.absoluteFilePath("share/help/dvbcut_en.html");
   }
-#endif
+#endif	// ifndef __WIN32__
+#endif	// ! ifdef DVBCUT_DATADIR
   if (QFile::exists(helpFile)) {
     helpDialog dlg(this, helpFile);
     dlg.exec();

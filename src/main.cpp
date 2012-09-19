@@ -203,7 +203,13 @@ main(int argc, char *argv[]) {
 	QTranslator translator, qtranslator;
 
 	qtranslator.load("qt_" + locale, QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+	
+#ifdef DVBCUT_DATADIR
+	translator.load("dvbcut_" + locale, DVBCUT_DATADIR "/translations");
+#else
 	translator.load("dvbcut_" + locale);
+#endif
+
 	a.installTranslator(&qtranslator);
 	a.installTranslator(&translator);
 
