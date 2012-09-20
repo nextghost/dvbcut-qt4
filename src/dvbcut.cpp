@@ -41,6 +41,7 @@
 #include <QPixmap>
 #include <QRegExpValidator>
 #include <QWheelEvent>
+#include <QLocale>
 
 bool dvbcut::cache_friendly = true;
 
@@ -115,6 +116,31 @@ public:
 		setupUi(this);
 	}
 };
+
+QString localizeFile(const QString &filename) {
+	QFileInfo finfo(filename), tmpinfo;
+	QString path, basename, suffix;
+	int idx;
+
+	if (finfo.exists()) {
+		return filename;
+	}
+
+	path = finfo.path();
+	basename = finfo.completeBaseName();
+	suffix = finfo.suffix();
+
+	for (idx = basename.lastIndexOf('_'); idx >= 0; idx = basename.lastIndexOf('_')) {
+		basename = basename.left(idx);
+		tmpinfo.setFile(path + '/' + basename + '.' + suffix);
+
+		if (tmpinfo.exists()) {
+			return tmpinfo.filePath();
+		}
+	}
+
+	return QString();
+}
 
 void dvbcut::setbusy(bool b) {
 	if (b) {
@@ -605,18 +631,28 @@ void dvbcut::on_helpAboutAction_triggered(void) {
 }
 
 void dvbcut::on_helpContentAction_triggered(void) {
+	QString basename = "dvbcut_" + QLocale::system().name() + ".html";
+	QString helpFile, localized;
+
+#ifdef DVBCUT_DATADIR
+	helpFile = DVBCUT_DATADIR "/help/" + basename;
+	localized = localizeFile(helpFile);
+#else	// ifdef DVBCUT_DATADIR
   QDir appDir(qApp->applicationDirPath());
   // first search in the directory containing dvbcut
-  QString helpFile = appDir.absoluteFilePath("dvbcut_en.html");
+  helpFile = appDir.absoluteFilePath(basename);
+  localized = localizeFile(helpFile);
 #ifndef __WIN32__
   // Unix/Linux: search in the associated share subdirectory
-  if (!QFile::exists(helpFile)) {
+  if (localized.isNull()) {
 	appDir.cdUp();
-    helpFile = appDir.absoluteFilePath("share/help/dvbcut_en.html");
+    helpFile = appDir.absoluteFilePath("share/help/" + basename);
+    localized = localizeFile(helpFile);
   }
-#endif
-  if (QFile::exists(helpFile)) {
-    helpDialog dlg(this, helpFile);
+#endif	// ifndef __WIN32__
+#endif	// ! ifdef DVBCUT_DATADIR
+  if (!localized.isNull()) {
+    helpDialog dlg(this, localized);
     dlg.exec();
   }
   else {
