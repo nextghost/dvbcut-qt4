@@ -99,7 +99,7 @@ unix {
 	desktopinst.path = "/usr/share/applications"
 	desktopinst.CONFIG += no_check_exist
 
-	helpinst.files = dvbcut.html dvbcut_cs.html
+        helpinst.files = dvbcut.html dvbcut_cs.html dvbcut_de.html
 	helpinst.path = "$$DATADIR/help"
 
 	QMAKE_EXTRA_COMPILERS += desktop
