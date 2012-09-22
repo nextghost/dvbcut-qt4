@@ -35,7 +35,7 @@ EventListModel::~EventListModel(void) {
 }
 
 QVariant EventListModel::data(const QModelIndex &index, int role) const {
-	if (!index.isValid() || index.row() >= _data.size() || role != Qt::DisplayRole) {
+	if (!index.isValid() || index.row() < 0 || index.row() >= _data.size() || role != Qt::DisplayRole) {
 		return QVariant();
 	}
 
@@ -43,7 +43,7 @@ QVariant EventListModel::data(const QModelIndex &index, int role) const {
 }
 
 Qt::ItemFlags EventListModel::flags(const QModelIndex &index) const {
-	if (!index.isValid() || index.row() >= _data.size()) {
+	if (!index.isValid() || index.row() < 0 || index.row() >= _data.size()) {
 		return Qt::NoItemFlags;
 	}
 
@@ -51,11 +51,11 @@ Qt::ItemFlags EventListModel::flags(const QModelIndex &index) const {
 }
 
 int EventListModel::rowCount(const QModelIndex &parent) const {
-	return _data.size();
+	return parent.isValid() ? 0 : _data.size();
 }
 
 QModelIndex EventListModel::index(int row, int col, const QModelIndex &parent) const {
-	if (row >= _data.size()) {
+	if (parent.isValid() || row < 0 || row >= _data.size()) {
 		return QModelIndex();
 	}
 
