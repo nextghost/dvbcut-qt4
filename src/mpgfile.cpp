@@ -113,6 +113,7 @@ mpgfile::open(inbuffer &b, std::string *errormessage) {
 
 void mpgfile::decodegop(int start, int stop, std::list<avframe*> &framelist)
 {
+	int ret;
   stream *S=&s[videostream()];
   if (!S->avcc)
     return;
@@ -145,9 +146,14 @@ void mpgfile::decodegop(int start, int stop, std::list<avframe*> &framelist)
     sd->discard(idx[streampic].getpos().packetoffset());
   }
 
-  if (int rv=avcodec_open(S->avcc, S->dec))
-  {
-    fprintf(stderr,"avcodec_open returned %d\n",rv);
+#if LIBAVCODEC_VERSION_INT >= ((53<<16)+(0<<8)+0)
+  ret = avcodec_open2(S->avcc, S->dec, NULL);
+#else
+  ret = avcodec_open(S->avcc, S->dec);
+#endif
+
+  if (ret) {
+    fprintf(stderr,"avcodec_open returned %d\n",ret);
     return;
   }
   avframe avf;
@@ -739,6 +745,8 @@ void mpgfile::savempg(muxer &mux, int start, int stop, int savedpics, int savepi
 
 void mpgfile::recodevideo(muxer &mux, int start, int stop, pts_t offset,int savedpics,int savepics, logoutput *log)
 {
+	int ret;
+
   if (log) {
     log->printinfo(QCoreApplication::translate("mpgfile", "Recoding %n pictures", "", QCoreApplication::CodecForTr, stop-start));
   }
@@ -751,11 +759,16 @@ void mpgfile::recodevideo(muxer &mux, int start, int stop, pts_t offset,int save
     return;
   s[VIDEOSTREAM].setvideoencodingparameters();
 
-  if (int rv=avcodec_open(avcc, s[VIDEOSTREAM].enc))
-  {
+#if LIBAVCODEC_VERSION_INT >= ((53<<16)+(0<<8)+0)
+  ret = avcodec_open2(avcc, s[VIDEOSTREAM].enc, NULL);
+#else
+  ret = avcodec_open(avcc, s[VIDEOSTREAM].enc);
+#endif
+
+  if (ret) {
     if (log) {
       //: Placeholder will be replaced with return value (integer)
-      log->printerror(QCoreApplication::translate("mpgfile", "avcodec_open(mpeg2video_encoder) returned %1").arg(rv));
+      log->printerror(QCoreApplication::translate("mpgfile", "avcodec_open(mpeg2video_encoder) returned %1").arg(ret));
     }
     return ;
   }

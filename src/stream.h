@@ -44,16 +44,24 @@ protected:
     }
   void freeavcc()
     {
-    if (avcc)
+    if (avcc) {
+#if LIBAVCODEC_VERSION_INT >= ((53<<16)+(0<<8)+0)
+	avcodec_close(avcc);
+#endif
       av_free(avcc);
+	}
     avcc=0;
     }
   void allocavcc()
     {
     if (avcc)
       av_free(avcc);
+#if LIBAVCODEC_VERSION_INT >= ((53<<16)+(0<<8)+0)
+    avcc=avcodec_alloc_context3(NULL);
+#else
     avcc=avcodec_alloc_context();
     avcodec_get_context_defaults(avcc);
+#endif
     }
   void setvideoencodingparameters(bool interlaced=false)
     {
