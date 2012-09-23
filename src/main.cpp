@@ -34,6 +34,7 @@
 
 #include <qapplication.h>
 #include <QTranslator>
+#include <QLibraryInfo>
 extern "C" {
 #include <libavformat/avformat.h>
 }
@@ -200,6 +201,17 @@ main(int argc, char *argv[]) {
   QApplication a(argc, argv);
   QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 	QString locale = QLocale::system().name();
+<<<<<<< HEAD
+
+    // translation file for Qt
+    QTranslator qtTranslator;
+    qtTranslator.load("qt_" + locale, QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+    a.installTranslator(&qtTranslator);
+
+    // translation file for application strings
+    QTranslator translator;
+    translator.load("dvbcut_" + locale, a.applicationDirPath());
+=======
 	QTranslator translator, qtranslator;
 
 	qtranslator.load("qt_" + locale, QLibraryInfo::location(QLibraryInfo::TranslationsPath));
@@ -211,6 +223,7 @@ main(int argc, char *argv[]) {
 #endif
 
 	a.installTranslator(&qtranslator);
+>>>>>>> upstream/master
 	a.installTranslator(&translator);
 
 #ifdef HAVE_LIB_AO

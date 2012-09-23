@@ -21,7 +21,7 @@
 extern "C" {
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
-#include <libavutil/opt.h>
+#include <libavcodec/opt.h>
 }
 #include <cstring>
 #include <utility>
