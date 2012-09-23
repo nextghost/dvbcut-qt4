@@ -40,15 +40,6 @@
 #define DVBCUT_DEFAULT_PRJFILTER \
 	"dvbcut project files (*.dvbcut);;All files (*)"
 
-#define DVBCUT_DEFAULT_START_LABEL \
-	"<font size=\"+1\" color=\"darkgreen\"><b>START</b></font>"
-#define DVBCUT_DEFAULT_STOP_LABEL \
-	"<font size=\"+1\" color=\"darkred\"><b>STOP</b></font>"
-#define DVBCUT_DEFAULT_CHAPTER_LABEL \
-	"<font color=\"darkgoldenrod\">CHAPTER</font>"
-#define DVBCUT_DEFAULT_BOOKMARK_LABEL \
-	"<font color=\"darkblue\">BOOKMARK</font>"
-
 #define DVBCUT_DEFAULT_PIPE_COMMAND \
         "|dvdauthor -t -c '%CHAPTERS%' -v mpeg2 -o '%OUTPUT%' -"
 #define DVBCUT_DEFAULT_PIPE_POST \
@@ -247,12 +238,6 @@ dvbcut_settings::load_settings() {
       }
     }
   endGroup();	// recentfiles
-  beginGroup("/labels");
-    start_label = readEntry("/start", DVBCUT_DEFAULT_START_LABEL);
-    stop_label = readEntry("/stop", DVBCUT_DEFAULT_STOP_LABEL);
-    chapter_label = readEntry("/chapter", DVBCUT_DEFAULT_CHAPTER_LABEL);
-    bookmark_label = readEntry("/bookmark", DVBCUT_DEFAULT_BOOKMARK_LABEL);
-  endGroup();	// labels
   start_bof = readBoolEntry("/start_bof", true);
   stop_eof = readBoolEntry("/stop_eof", true);
   beginGroup("/snapshots");
@@ -367,12 +352,6 @@ dvbcut_settings::save_settings() {
       endGroup();	// key
     }
   endGroup();	// recentfiles
-  beginGroup("/labels");
-    setValue("/start", start_label);
-    setValue("/stop", stop_label);
-    setValue("/chapter", chapter_label);
-    setValue("/bookmark", bookmark_label);
-  endGroup();	// labels
   setValue("/start_bof", start_bof);
   setValue("/stop_eof", stop_eof);
   beginGroup("/snapshots");

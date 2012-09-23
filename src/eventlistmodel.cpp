@@ -152,32 +152,55 @@ const EventListModel::EventListItem *EventListModel::operator[](const QModelInde
 }
 
 static QString itemstr(const EventListModel::EventListItem &item) {
-	QString ret = "%1<br>%2<br>%3 (%4)";
+	QString tmp, ret = "%3<br>%4<br>%1 (%2)";
+	int idx;
+
+	static const char *markerStyles[] = {
+		"<font size=\"+1\" color=\"darkgreen\"><b>%1</b></font>",
+		"<font size=\"+1\" color=\"darkred\"><b>%1</b></font>",
+		"<font color=\"darkgoldenrod\">%1</font>",
+		"<font color=\"darkblue\">%1</font>",
+		"<b>%1</b>"
+	};
+
+	static const char *markerNames[] = {
+		//: Text shown on start markers in the main window marker list
+		QT_TRANSLATE_NOOP("eventlist", "START"),
+		//: Text shown on stop markers in the main window marker list
+		QT_TRANSLATE_NOOP("eventlist", "STOP"),
+		//: Text shown on chapter markers in the main window marker list
+		QT_TRANSLATE_NOOP("eventlist", "CHAPTER"),
+		//: Text shown on bookmark markers in the main window marker list
+		QT_TRANSLATE_NOOP("eventlist", "BOOKMARK"),
+		//: Text shown on markers of unknown type in the main window marker list
+		QT_TRANSLATE_NOOP("eventlist", "Unknown")
+	};
 
 	switch (item.evtype) {
 	case EventListModel::Start:
-		ret = ret.arg(settings().start_label);
+		idx = 0;
 		break;
 
 	case EventListModel::Stop:
-		ret = ret.arg(settings().stop_label);
+		idx = 1;
 		break;
 
 	case EventListModel::Chapter:
-		ret = ret.arg(settings().chapter_label);
+		idx = 2;
 		break;
 
 	case EventListModel::Bookmark:
-		ret = ret.arg(settings().bookmark_label);
+		idx = 3;
 		break;
 
 	default:
-		ret = ret.arg("<b>Unknown</b>");
+		idx = 4;
 		break;
 	}
 
-	ret = ret.arg(timestr(item.pts));
+	tmp = QString(markerStyles[idx]).arg(qApp->translate("eventlist", markerNames[idx]));
 	ret = ret.arg(item.pic).arg("?IPB????"[item.pictype & 0x7]);
+	ret = ret.arg(tmp, timestr(item.pts));
 	return ret;
 }
 
