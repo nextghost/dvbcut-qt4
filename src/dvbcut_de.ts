@@ -10,7 +10,6 @@
 (assuming No)
 </source>
         <extracomment>Question during batch processing - print the prompt and tell the user that you assume the answer is No.</extracomment>
-        <translatorcomment>Kontext unbekannt (assuming = vorausgesetzt)</translatorcomment>
         <translation>%1
 %2
 (vermutlich nicht)</translation>
@@ -275,7 +274,6 @@ Konnte Datei nicht öffnen</translation>
     <message>
         <location filename="dvbcut.cpp" line="1698"/>
         <source>Chapter list</source>
-        <translatorcomment>oder Kapitelliste</translatorcomment>
         <translation>Kapitel-Liste</translation>
     </message>
     <message>
@@ -297,7 +295,6 @@ Konnte Datei nicht öffnen</translation>
         <location filename="dvbcut.cpp" line="2129"/>
         <source>Mass delete</source>
         <extracomment>Submenu containing mass delete actions</extracomment>
-        <translatorcomment>oder : Massenweise, Auswahl</translatorcomment>
         <translation>Mengen löschen</translation>
     </message>
     <message>
@@ -313,7 +310,7 @@ Konnte Datei nicht öffnen</translation>
     <message>
         <location filename="dvbcut.cpp" line="2136"/>
         <source>Delete all start/stops</source>
-        <translation>Alle Start/Stop löschen</translation>
+        <translation>Alle Start/Stopp löschen</translation>
     </message>
     <message>
         <location filename="dvbcut.cpp" line="2137"/>
@@ -339,7 +336,7 @@ Konnte Datei nicht öffnen</translation>
     <message>
         <location filename="dvbcut.cpp" line="2149"/>
         <source>Convert to stop marker</source>
-        <translation>Umwandeln in STOP-Markierung</translation>
+        <translation>Umwandeln in STOPP-Markierung</translation>
     </message>
     <message>
         <location filename="dvbcut.cpp" line="2153"/>
@@ -413,7 +410,6 @@ Konnte Datei nicht öffnen</translation>
     <message>
         <location filename="dvbcutbase.ui" line="476"/>
         <source>New</source>
-        <translatorcomment>Öffnet neue leere Instanz...</translatorcomment>
         <translation>Neu</translation>
     </message>
     <message>
@@ -429,7 +425,6 @@ Konnte Datei nicht öffnen</translation>
     <message>
         <location filename="dvbcutbase.ui" line="502"/>
         <source>&amp;Save</source>
-        <translatorcomment>speichert ausschließlich Projektdateien!?!</translatorcomment>
         <translation>&amp;Speichern</translation>
     </message>
     <message>
@@ -440,7 +435,6 @@ Konnte Datei nicht öffnen</translation>
     <message>
         <location filename="dvbcutbase.ui" line="518"/>
         <source>Save &amp;As...</source>
-        <translatorcomment>speichert ausschließlich Projektdateien!?!</translatorcomment>
         <translation>Speichern &amp;unter...</translation>
     </message>
     <message>
@@ -456,7 +450,6 @@ Konnte Datei nicht öffnen</translation>
     <message>
         <location filename="dvbcutbase.ui" line="542"/>
         <source>Save Chapter Snapshots</source>
-        <translatorcomment>Auch: Bildschirmfoto,Schnappschuss</translatorcomment>
         <translation>Kapitel-Schnappschuss speichern</translation>
     </message>
     <message>
@@ -497,7 +490,7 @@ Konnte Datei nicht öffnen</translation>
     <message>
         <location filename="dvbcutbase.ui" line="596"/>
         <source>Set stop marker</source>
-        <translation>STOP-Markierung setzen</translation>
+        <translation>STOPP-Markierung setzen</translation>
     </message>
     <message>
         <location filename="dvbcutbase.ui" line="599"/>
@@ -547,7 +540,6 @@ Konnte Datei nicht öffnen</translation>
     <message>
         <location filename="dvbcutbase.ui" line="659"/>
         <source>Import bookmarks</source>
-        <translatorcomment>Auch: Lesezeichen, Sprungmarke</translatorcomment>
         <translation>Lesezeichen importieren</translation>
     </message>
     <message>
@@ -737,31 +729,31 @@ Konnte Datei nicht öffnen</translation>
         <location filename="eventlistmodel.cpp" line="168"/>
         <source>START</source>
         <extracomment>Text shown on start markers in the main window marker list</extracomment>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="eventlistmodel.cpp" line="170"/>
         <source>STOP</source>
         <extracomment>Text shown on stop markers in the main window marker list</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>STOPP</translation>
     </message>
     <message>
         <location filename="eventlistmodel.cpp" line="172"/>
         <source>CHAPTER</source>
         <extracomment>Text shown on chapter markers in the main window marker list</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>KAPITEL</translation>
     </message>
     <message>
         <location filename="eventlistmodel.cpp" line="174"/>
         <source>BOOKMARK</source>
         <extracomment>Text shown on bookmark markers in the main window marker list</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>LESEZEICHEN</translation>
     </message>
     <message>
         <location filename="eventlistmodel.cpp" line="176"/>
         <source>Unknown</source>
         <extracomment>Text shown on markers of unknown type in the main window marker list</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Unbekannt</translation>
     </message>
 </context>
 <context>
