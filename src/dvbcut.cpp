@@ -43,6 +43,16 @@
 #include <QWheelEvent>
 #include <QLocale>
 
+#define DVBCUT_LOADFILTER \
+	QT_TRANSLATE_NOOP("dvbcut", "Recognized files (*.dvbcut *.m2t *.mpg *.rec* *.ts *.tts* *.trp *.vdr);;" \
+	"dvbcut project files (*.dvbcut);;" \
+	"MPEG files (*.m2t *.mpg *.rec* *.ts *.tts* *.trp *.vdr);;" \
+	"All files (*)")
+#define DVBCUT_IDXFILTER \
+	QT_TRANSLATE_NOOP("dvbcut", "dvbcut index files (*.idx);;All files (*)")
+#define DVBCUT_PRJFILTER \
+	QT_TRANSLATE_NOOP("dvbcut", "dvbcut project files (*.dvbcut);;All files (*)")
+
 bool dvbcut::cache_friendly = true;
 
 // **************************************************************************
@@ -778,7 +788,7 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
       this,
       tr("Choose one or more MPEG files to open"),
       settings().lastdir,
-      settings().loadfilter);
+      tr(DVBCUT_LOADFILTER));
     if (fn.empty()) {
 //      fprintf(stderr,"open(): QFileDialog::getOpenFileNames() returned EMPTY filelist!!!\n");    
 //      fprintf(stderr,"        If you didn't saw a FileDialog, please check your 'lastdir' settings variable...");    
@@ -1009,7 +1019,7 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
 		  this,
 		  tr("Choose the name of the index file"),
 		  "file:" + finfo.fileName(),
-		  settings().idxfilter,
+		  tr(DVBCUT_IDXFILTER),
 		  NULL,
 		  QFileDialog::DontConfirmOverwrite);
 	QDir::setCurrent(curpath);
@@ -1373,7 +1383,7 @@ void dvbcut::on_fileSaveAsAction_triggered(void) {
     this,
     tr("Choose the name of the project file"),
     QString::fromStdString(prjfilen),
-    settings().prjfilter);
+    tr(DVBCUT_PRJFILTER));
 
   if (s.isNull())
     return;

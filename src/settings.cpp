@@ -30,16 +30,6 @@
 
 #define DVBCUT_QSETTINGS_PATH "/" DVBCUT_QSETTINGS_DOMAIN "/" DVBCUT_QSETTINGS_PRODUCT "/"
 
-#define DVBCUT_DEFAULT_LOADFILTER \
-	"Recognized files (*.dvbcut *.m2t *.mpg *.rec* *.ts *.tts* *.trp *.vdr);;" \
-	"dvbcut project files (*.dvbcut);;" \
-	"MPEG files (*.m2t *.mpg *.rec* *.ts *.tts* *.trp *.vdr);;" \
-	"All files (*)"
-#define DVBCUT_DEFAULT_IDXFILTER \
-	"dvbcut index files (*.idx);;All files (*)"
-#define DVBCUT_DEFAULT_PRJFILTER \
-	"dvbcut project files (*.dvbcut);;All files (*)"
-
 #define DVBCUT_DEFAULT_PIPE_COMMAND \
         "|dvdauthor -t -c '%CHAPTERS%' -v mpeg2 -o '%OUTPUT%' -"
 #define DVBCUT_DEFAULT_PIPE_POST \
@@ -137,11 +127,6 @@ dvbcut_settings::load_settings() {
       lastdir = readEntry("/name", "");
       lastdir_update = readBoolEntry("/update", true);
     endGroup(); // lastdir
-    beginGroup("/filter");
-      idxfilter = readEntry("/idxfilter", DVBCUT_DEFAULT_IDXFILTER);
-      prjfilter = readEntry("/prjfilter", DVBCUT_DEFAULT_PRJFILTER);
-      loadfilter = readEntry("/loadfilter", DVBCUT_DEFAULT_LOADFILTER);
-    endGroup();	// filter
   }
   else {
     // old (unnumbered) config format
@@ -167,9 +152,6 @@ dvbcut_settings::load_settings() {
       lin_interval = 0;
     lastdir = readEntry("/lastdir", "");
     lastdir_update = true;
-    idxfilter = readEntry("/idxfilter", DVBCUT_DEFAULT_IDXFILTER);
-    prjfilter = readEntry("/prjfilter", DVBCUT_DEFAULT_PRJFILTER);
-    loadfilter = readEntry("/loadfilter", DVBCUT_DEFAULT_LOADFILTER);
     // remove old-style entries
     remove("/wheel_incr_normal");
     remove("/wheel_incr_shift");
@@ -314,11 +296,6 @@ dvbcut_settings::save_settings() {
     setValue("/name", lastdir);
     setValue("/update", lastdir_update);
   endGroup();	// lastdir
-  beginGroup("/filter");
-    setValue("/idxfilter", idxfilter);
-    setValue("/prjfilter", prjfilter);
-    setValue("/loadfilter", loadfilter);
-  endGroup();	// filter
   beginGroup("/viewscalefactor");
     setValue("/current", viewscalefactor);
     setValue("/custom", viewscalefactor_custom);
