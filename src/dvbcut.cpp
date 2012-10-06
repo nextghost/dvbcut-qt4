@@ -1018,7 +1018,7 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
 	  QString s=QFileDialog::getSaveFileName(
 		  this,
 		  tr("Choose the name of the index file"),
-          "file://" + finfo.fileName(),
+          "file:" + finfo.fileName(),
 		  tr(DVBCUT_IDXFILTER),
 		  NULL,
 		  QFileDialog::DontConfirmOverwrite);
