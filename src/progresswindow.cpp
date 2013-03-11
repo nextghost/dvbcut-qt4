@@ -71,7 +71,7 @@ void progresswindow::closeEvent(QCloseEvent *e)
 
 void progresswindow::print(const QString &str, const QTextCharFormat &format) {
 	logbrowser->setCurrentCharFormat(format);
-	logbrowser->insertPlainText(str + "\n");
+	logbrowser->append(str);
 	logbrowser->ensureCursorVisible();
 	qApp->processEvents();
 }
