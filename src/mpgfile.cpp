@@ -790,7 +790,11 @@ void mpgfile::recodevideo(muxer &mux, int start, int stop, pts_t offset,int save
       f->pts=idx[idx.indexnr(start+p)].getpts()-startpts;
       f->coded_picture_number=f->display_picture_number=p;
       f->key_frame=(p==0)?1:0;
+#if LIBAVUTIL_VERSION_INT >= ((51<<16)+(73<<8)+101)
+      f->pict_type=(p==0)?AV_PICTURE_TYPE_I:AV_PICTURE_TYPE_P;
+#else
       f->pict_type=(p==0)?FF_I_TYPE:FF_P_TYPE;
+#endif
 
       out = avcodec_encode_video(avcc, buf,
                                  m2v.getsize(), f);
