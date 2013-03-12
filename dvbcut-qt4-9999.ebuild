@@ -17,8 +17,8 @@ LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
 
-RDEPEND="x11-libs/qt-core
-	x11-libs/qt-gui
+RDEPEND="dev-qt/qtcore
+	dev-qt/qtgui
 	media-libs/libao
 	media-libs/libmad
 	media-video/ffmpeg"
