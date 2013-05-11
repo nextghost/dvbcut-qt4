@@ -11,7 +11,7 @@ QT += xml
 
 system(pkg-config --exists libavcodec) {
 	message(Building with external FFMPEG)
-	PKGCONFIG += libavformat libavcodec
+	PKGCONFIG += libavformat libavcodec libavutil
 
 	system(pkg-config --exists libswscale) {
 		message(Building with libswscale support)

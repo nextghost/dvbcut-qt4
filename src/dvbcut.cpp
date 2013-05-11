@@ -30,6 +30,7 @@
 #include "mpegmuxer.h"
 #include "lavfmuxer.h"
 
+#include <unistd.h>
 #include <memory>
 #include <cmath>
 #include <cerrno>
