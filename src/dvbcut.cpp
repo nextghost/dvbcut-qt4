@@ -1074,7 +1074,8 @@ void dvbcut::open(std::list<std::string> filenames, std::string idxfilename, std
   if (pictures<0) {
     progressstatusbar psb(statusBar());
     psb.setprogress(500);
-    psb.print("Indexing '%s'...",filename.c_str());
+    //: Text shown in the main window status bar when generating index. For example: "Indexing 'path/to/file.mpg'..."
+    psb.print(tr("Indexing '%1'...").arg(filename.c_str()));
     std::string errorstring;
     busy.setbusy(true);
     pictures=mpg->generateindex(idxfilename.empty()?0:idxfilename.c_str(),&errorstring,&psb);
