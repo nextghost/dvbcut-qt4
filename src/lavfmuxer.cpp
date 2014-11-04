@@ -39,6 +39,11 @@ extern "C" {
 	#define av_alloc_format_context avformat_alloc_context
 	#define CODEC_TYPE_AUDIO AVMEDIA_TYPE_AUDIO
 
+#if LIBAVCODEC_VERSION_INT < ((55<<16)+(45<<8)+101)
+	#define av_frame_alloc avcodec_alloc_frame
+	#define av_frame_free avcodec_free_frame
+#endif
+
 int decode_audio3(AVCodecContext *avctx, int16_t *samples, int *frame_size_ptr, AVPacket *avpkt) {
     AVFrame *frame = av_frame_alloc();
     int ret, got_frame = 0;
